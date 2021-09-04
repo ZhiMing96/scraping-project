@@ -1,0 +1,818 @@
+[
+  {
+    "name": "Alejandra Calvo",
+    "investorProfileLink": "https://signal.nfx.com/investors/alejandra-calvo",
+    "firm": "Initialized Capital",
+    "position": "Associate",
+    "imgLink": "https://d18zd1fdi56ai5.cloudfront.net/variants/abkm6l5kvo4mqgxdp505zlbjz3ks/a503d4b2689155fa90a924b2812f95c3821865602a68447b0bbbaf6a00dd19a0?d=160x160",
+    "employeeDetails": {
+      "basicInfo": {
+        "name": "Alejandra Calvo",
+        "titles": ["VC", "Investor"],
+        "currJobTitle": "Associate at Initialized Capital"
+      },
+      "socialLinks": [
+        "https://www.initialized.com/who/alejandra/",
+        "https://www.linkedin.com/in/alejandra-calvo-89090785/",
+        "https://www.twitter.com/alecalbou",
+        "https://www.crunchbase.com/person/alejandra-calvo"
+      ],
+      "experienceData": [],
+      "summaryInfo": [
+        {
+          "label": "CURRENT INVESTING POSITION",
+          "value": "Initialized Capital  Associate"
+        },
+        { "label": "INVESTMENT RANGE", "value": "$1M - $4.0M" },
+        { "label": "SWEET SPOT", "value": "$2.5M" },
+        { "label": "CURRENT FUND SIZE", "value": "$1M" }
+      ],
+      "investorSectors": [
+        {
+          "tag": "FinTech (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-fintech-seed-investors"
+        },
+        {
+          "tag": "Media/Content (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-media-content-seed-investors"
+        },
+        {
+          "tag": "New York City",
+          "link": "https://signal.nfx.com/investor-lists/top-new-york-city-investors"
+        }
+      ],
+      "investmentList": []
+    }
+  },
+  {
+    "name": "Kim-Mai Cutler",
+    "investorProfileLink": "https://signal.nfx.com/investors/kim-mai-cutler",
+    "firm": "Initialized Capital",
+    "position": "Partner",
+    "imgLink": "https://d18zd1fdi56ai5.cloudfront.net/variants/53Tq5SBsZs6yqRuhNoshB4gE/a503d4b2689155fa90a924b2812f95c3821865602a68447b0bbbaf6a00dd19a0?d=160x160",
+    "employeeDetails": {
+      "basicInfo": {
+        "name": "Kim-Mai Cutler(260)",
+        "titles": ["VC", "Investor"],
+        "currJobTitle": "Partner at Initialized Capital"
+      },
+      "socialLinks": [
+        "https://www.initialized.com/who/kim-mai",
+        "https://www.linkedin.com/in/kimmaicutler/",
+        "https://www.twitter.com/kimmaicutler",
+        "https://www.angel.co/u/kimmaicutler",
+        "https://www.crunchbase.com/person/kim-mai-cutler"
+      ],
+      "experienceData": [],
+      "summaryInfo": [
+        {
+          "label": "CURRENT INVESTING POSITION",
+          "value": "Initialized Capital  Partner"
+        },
+        { "label": "INVESTMENT RANGE", "value": "$1M - $4.0M" },
+        { "label": "SWEET SPOT", "value": "$2.5M" },
+        { "label": "INVESTMENTS ON RECORD", "value": "4" },
+        { "label": "CURRENT FUND SIZE", "value": "$1M" }
+      ],
+      "investorSectors": [
+        {
+          "tag": "Blockchain (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-blockchain-seed-investors"
+        },
+        {
+          "tag": "Cryptocurrency (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-cryptocurrency-seed-investors"
+        },
+        {
+          "tag": "Enterprise (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-enterprise-seed-investors"
+        },
+        {
+          "tag": "San Francisco Bay Area",
+          "link": "https://signal.nfx.com/investor-lists/top-san-francisco-bay-area-investors"
+        }
+      ],
+      "investmentList": [
+        {
+          "companyName": "Career Karma",
+          "roundDetails": [
+            { "stage": "Series A", "date": "Dec 2020", "roundSize": "$10M" }
+          ],
+          "totalRaised": "$11.9375M",
+          "coInvestors": [
+            " Garry Tan (Initialized Capital)",
+            " James Joaquin (Obvious Ventures)",
+            " Brian Dixon (Kapor Capital)",
+            " Jewel Burks (Collab Capital)",
+            " Erik Torenberg (Village Global)",
+            " Michael Seibel (Y Combinator)",
+            " Fern Mandelbaum (Vista Venture Partners)",
+            " Kevin Lee",
+            " Caterina Fake",
+            " Iman Abuzeid",
+            " Edward Lando"
+          ]
+        },
+        {
+          "companyName": "Abodu",
+          "roundDetails": [
+            { "stage": "Seed Round", "date": "Oct 2020", "roundSize": "$3.5M" }
+          ],
+          "totalRaised": "$23.5M",
+          "coInvestors": [" Hans Tung (GGV Capital)"]
+        },
+        {
+          "companyName": "Landed",
+          "roundDetails": [
+            { "stage": "Series A", "date": "Jun 2020", "roundSize": "$10.5M" },
+            { "stage": "Series A", "date": "Apr 2019", "roundSize": "$7.5M" }
+          ],
+          "totalRaised": "$22.12M",
+          "coInvestors": [
+            " Clint Korver (Ulu Ventures)",
+            " Omar Darwazah (AAF Management Ltd.)",
+            " Michael Yang (OMERS Ventures)",
+            " Miriam Rivera (Ulu Ventures)",
+            " Peter Livingston (Unpopular Ventures)",
+            " Serik Kaldykulov (Elefund)",
+            " Tyler Scriven (Techstars)",
+            " Kevin Moore (KRM Interests LLC)",
+            " Louis Beryl",
+            " Christopher Langford"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "Alda Dennis",
+    "investorProfileLink": "https://signal.nfx.com/investors/alda-dennis",
+    "firm": "Initialized Capital",
+    "position": "General Partner",
+    "imgLink": "https://d18zd1fdi56ai5.cloudfront.net/variants/jcbb2iu22e2h43iknr5e5wipmdl4/a503d4b2689155fa90a924b2812f95c3821865602a68447b0bbbaf6a00dd19a0?d=160x160",
+    "employeeDetails": {
+      "basicInfo": {
+        "name": "Alda Dennis",
+        "titles": ["VC", "Investor"],
+        "currJobTitle": "General Partner at Initialized"
+      },
+      "socialLinks": [
+        "https://www.initialized.com/who/alda",
+        "https://www.linkedin.com/in/aldadennis/",
+        "https://www.twitter.com/AldaLeuDennis",
+        "https://www.angel.co/p/alda-dennis",
+        "https://www.crunchbase.com/person/alda-leu-dennis"
+      ],
+      "experienceData": [],
+      "summaryInfo": [
+        {
+          "label": "CURRENT INVESTING POSITION",
+          "value": "Initialized Capital  General Partner"
+        },
+        { "label": "INVESTMENT RANGE", "value": "$1M - $4.0M" },
+        { "label": "SWEET SPOT", "value": "$2.5M" },
+        { "label": "INVESTMENTS ON RECORD", "value": "4" },
+        { "label": "CURRENT FUND SIZE", "value": "$1M" }
+      ],
+      "investorSectors": [
+        {
+          "tag": "Consumer Internet (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-consumer-internet-seed-investors"
+        },
+        {
+          "tag": "Enterprise (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-enterprise-seed-investors"
+        },
+        {
+          "tag": "SaaS (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-saas-seed-investors"
+        },
+        {
+          "tag": "San Francisco Bay Area",
+          "link": "https://signal.nfx.com/investor-lists/top-san-francisco-bay-area-investors"
+        }
+      ],
+      "investmentList": [
+        {
+          "companyName": "Resolve",
+          "roundDetails": [
+            {
+              "stage": "Venture Round",
+              "date": "May 2021",
+              "roundSize": "$60M"
+            },
+            { "stage": "Seed Round", "date": "May 2021", "roundSize": "$60M" }
+          ],
+          "totalRaised": "$120M",
+          "coInvestors": [" Ashley Flucas"]
+        },
+        {
+          "companyName": "A-Frame Brands",
+          "roundDetails": [
+            { "stage": "Seed Round", "date": "Nov 2020", "roundSize": "$2M" }
+          ],
+          "totalRaised": "$2M",
+          "coInvestors": []
+        },
+        {
+          "companyName": "SkySelect",
+          "roundDetails": [
+            { "stage": "Seed Round", "date": "Aug 2018", "roundSize": "$2.8M" }
+          ],
+          "totalRaised": "$2.8M",
+          "coInvestors": [" Ajay Agarwal (Bain Capital Ventures)"]
+        }
+      ]
+    }
+  },
+  {
+    "name": "Brett Gibson",
+    "investorProfileLink": "https://signal.nfx.com/investors/brett-gibson_1",
+    "firm": "Initialized Capital",
+    "position": "General Partner",
+    "imgLink": "https://d18zd1fdi56ai5.cloudfront.net/variants/sxphj1jwc84y4c0ji0it6ebaegwm/a503d4b2689155fa90a924b2812f95c3821865602a68447b0bbbaf6a00dd19a0?d=160x160",
+    "employeeDetails": {
+      "basicInfo": {
+        "name": "Brett Gibson",
+        "titles": ["VC"],
+        "currJobTitle": "Unknown"
+      },
+      "socialLinks": [
+        "https://www.linkedin.com/in/bcg4muva/",
+        "https://www.angel.co/brett-gibson-9275",
+        "https://www.crunchbase.com/person/brett-gibson-2"
+      ],
+      "experienceData": [
+        {
+          "position": "Managing Partner and Co-Founder",
+          "company": "NextGen Venture Partners",
+          "period": "2014 - Present"
+        },
+        {
+          "position": "Major, Army Ranger Qualified",
+          "company": "Army National Guard",
+          "period": "2002 - Present"
+        },
+        {
+          "position": "Business Development",
+          "company": "LivingSocial",
+          "period": "2011 - 2014"
+        },
+        {
+          "position": "MBA Student",
+          "company": "Harvard Business School",
+          "period": "2009 - 2011"
+        },
+        {
+          "position": "Investment Analyst",
+          "company": "The Carlyle Group",
+          "period": "2006 - 2008"
+        },
+        {
+          "position": "Associate",
+          "company": "Deloitte",
+          "period": "2002 - 2006"
+        },
+        {
+          "position": "Founder",
+          "company": "Patriot Caliber",
+          "period": "2005 - 2005"
+        }
+      ],
+      "summaryInfo": [
+        {
+          "label": "CURRENT INVESTING POSITION",
+          "value": "NextGen Venture Partners  Managing Partner"
+        },
+        { "label": "CURRENT FUND SIZE", "value": "$20.7M" }
+      ],
+      "investorSectors": [
+        {
+          "tag": "Washington, D.C.",
+          "link": "https://signal.nfx.com/investor-lists/top-washington-d-c-investors"
+        }
+      ],
+      "investmentList": []
+    }
+  },
+  {
+    "name": "Andrew Lee",
+    "investorProfileLink": "https://signal.nfx.com/investors/andrew-lee_1",
+    "firm": "Initialized Capital",
+    "position": "Partner",
+    "imgLink": "https://d18zd1fdi56ai5.cloudfront.net/variants/rdafFbn1BJWrtwor3JpLNB1s/a503d4b2689155fa90a924b2812f95c3821865602a68447b0bbbaf6a00dd19a0?d=160x160"
+  },
+  {
+    "name": "Andrew Sather",
+    "investorProfileLink": "https://signal.nfx.com/investors/andrew-sather",
+    "firm": "Initialized Capital",
+    "position": "Principal",
+    "imgLink": "https://d18zd1fdi56ai5.cloudfront.net/variants/shzhspwwi7trfqcatn59s0zrg584/a503d4b2689155fa90a924b2812f95c3821865602a68447b0bbbaf6a00dd19a0?d=160x160",
+    "employeeDetails": {
+      "basicInfo": {
+        "name": "Andrew Sather",
+        "titles": ["VC", "Investor"],
+        "currJobTitle": "Principal at Initialized Capital"
+      },
+      "socialLinks": [
+        "https://www.initialized.com/who/andrew/",
+        "https://www.linkedin.com/in/andrewsather/",
+        "https://www.twitter.com/andrew_sather",
+        "https://www.angel.co/u/andrew-sather",
+        "https://www.crunchbase.com/person/andrew-sather-2"
+      ],
+      "experienceData": [],
+      "summaryInfo": [
+        {
+          "label": "CURRENT INVESTING POSITION",
+          "value": "Initialized Capital  Principal"
+        },
+        { "label": "INVESTMENT RANGE", "value": "$1M - $4.0M" },
+        { "label": "SWEET SPOT", "value": "$2.5M" },
+        { "label": "CURRENT FUND SIZE", "value": "$1M" }
+      ],
+      "investorSectors": [
+        {
+          "tag": "E-commerce (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-e-commerce-seed-investors"
+        },
+        {
+          "tag": "Health & Hospital Services (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-health-hospital-services-seed-investors"
+        },
+        {
+          "tag": "Health IT (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-health-it-seed-investors"
+        },
+        {
+          "tag": "Media/Content (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-media-content-seed-investors"
+        },
+        {
+          "tag": "SaaS (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-saas-seed-investors"
+        },
+        {
+          "tag": "San Francisco Bay Area",
+          "link": "https://signal.nfx.com/investor-lists/top-san-francisco-bay-area-investors"
+        }
+      ],
+      "investmentList": []
+    }
+  },
+  {
+    "name": "Parul Singh",
+    "investorProfileLink": "https://signal.nfx.com/investors/parul-singh",
+    "firm": "Initialized Capital",
+    "position": "Partner",
+    "imgLink": "https://d18zd1fdi56ai5.cloudfront.net/variants/Gscjdwrhmw7L5DWke3A3oxt4/a503d4b2689155fa90a924b2812f95c3821865602a68447b0bbbaf6a00dd19a0?d=160x160",
+    "employeeDetails": {
+      "basicInfo": {
+        "name": "Parul Singh(799)",
+        "titles": ["VC", "Investor", "Former CEO", "Founder"],
+        "currJobTitle": "Partner at Initialized Capital"
+      },
+      "socialLinks": [
+        "https://www.parulsingh.com/",
+        "https://www.linkedin.com/in/parulsingh/",
+        "https://www.twitter.com/parulia",
+        "https://www.angel.co/parul-singh",
+        "https://www.crunchbase.com/person/parul-singh"
+      ],
+      "experienceData": [],
+      "summaryInfo": [
+        {
+          "label": "CURRENT INVESTING POSITION",
+          "value": "Initialized Capital  Partner"
+        },
+        { "label": "INVESTMENT RANGE", "value": "$400K - $1.8M" },
+        { "label": "SWEET SPOT", "value": "$750K" },
+        { "label": "INVESTMENTS ON RECORD", "value": "1" },
+        { "label": "CURRENT FUND SIZE", "value": "$1M" }
+      ],
+      "investorSectors": [
+        {
+          "tag": "Advertising (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-advertising-seed-investors"
+        },
+        {
+          "tag": "Analytics (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-analytics-seed-investors"
+        },
+        {
+          "tag": "Blockchain (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-blockchain-seed-investors"
+        },
+        {
+          "tag": "Boston / New England",
+          "link": "https://signal.nfx.com/investor-lists/top-boston-new-england-investors"
+        },
+        {
+          "tag": "Consumer Health (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-consumer-health-seed-investors"
+        },
+        {
+          "tag": "Consumer Internet (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-consumer-internet-seed-investors"
+        },
+        {
+          "tag": "Cryptocurrency (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-cryptocurrency-seed-investors"
+        },
+        {
+          "tag": "Enterprise (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-enterprise-seed-investors"
+        },
+        {
+          "tag": "SaaS (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-saas-seed-investors"
+        },
+        {
+          "tag": "Sales & CRM (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-sales-crm-seed-investors"
+        }
+      ],
+      "investmentList": [
+        {
+          "companyName": "Karuna Health",
+          "roundDetails": [
+            { "stage": "Seed Round", "date": "May 2019", "roundSize": "$3.5M" }
+          ],
+          "totalRaised": "$4.7M",
+          "coInvestors": [
+            " Kevin Colleran (Slow Ventures)",
+            " Will Quist (Slow Ventures)",
+            " Phin Barnes"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "Garry Tan",
+    "investorProfileLink": "https://signal.nfx.com/investors/garry-tan",
+    "firm": "Initialized Capital",
+    "position": "Managing Partner",
+    "imgLink": "https://d18zd1fdi56ai5.cloudfront.net/variants/GpmCiDgwLjSw4X4rPsbNtvQa/a503d4b2689155fa90a924b2812f95c3821865602a68447b0bbbaf6a00dd19a0?d=160x160",
+    "employeeDetails": {
+      "basicInfo": {
+        "name": "Garry Tan(3)",
+        "titles": ["VC", "Founder", "Investor"],
+        "currJobTitle": "Managing Partner at Initialized Capital"
+      },
+      "socialLinks": [
+        "https://blog.garrytan.com/",
+        "https://www.linkedin.com/in/garrytan/",
+        "https://www.twitter.com/garrytan",
+        "https://www.angel.co/p/garrytan-gmail-com",
+        "https://www.crunchbase.com/person/garry-tan"
+      ],
+      "experienceData": [
+        {
+          "position": "Cofounder",
+          "company": "Posthaven.com",
+          "period": "2013 - Present"
+        },
+        {
+          "position": "Cofounder and Managing Partner",
+          "company": "Initialized Capital",
+          "period": "2012 - Present"
+        },
+        {
+          "position": "Partner",
+          "company": "Y Combinator",
+          "period": "2010 - 2015"
+        },
+        {
+          "position": "Cofounder",
+          "company": "Posterous.com",
+          "period": "2008 - 2011"
+        },
+        {
+          "position": "Lead Engineer, Designer",
+          "company": "Palantir Technologies",
+          "period": "2005 - 2007"
+        },
+        {
+          "position": "Program Manager",
+          "company": "Microsoft",
+          "period": "2003 - 2005"
+        },
+        {
+          "position": "Software Engineer Intern",
+          "company": "Sun Microsystems",
+          "period": "2002 - 2003"
+        },
+        {
+          "position": "Software Engineer Intern",
+          "company": "TheMan.com",
+          "period": "2000 - 2000"
+        },
+        {
+          "position": "Software Engineer Intern",
+          "company": "Sapient",
+          "period": "1998 - 2000"
+        }
+      ],
+      "summaryInfo": [
+        {
+          "label": "CURRENT INVESTING POSITION",
+          "value": "Initialized Capital  Managing Partner"
+        },
+        { "label": "INVESTMENT RANGE", "value": "$1M - $4.0M" },
+        { "label": "SWEET SPOT", "value": "$2.5M" },
+        { "label": "INVESTMENTS ON RECORD", "value": "121" },
+        { "label": "CURRENT FUND SIZE", "value": "$1M" }
+      ],
+      "investorSectors": [
+        {
+          "tag": "AI (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-ai-seed-investors"
+        },
+        {
+          "tag": "Analytics (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-analytics-seed-investors"
+        },
+        {
+          "tag": "Enterprise (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-enterprise-seed-investors"
+        },
+        {
+          "tag": "FinTech (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-fintech-seed-investors"
+        },
+        {
+          "tag": "Marketplaces (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-marketplaces-seed-investors"
+        },
+        {
+          "tag": "Media/Content (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-media-content-seed-investors"
+        },
+        {
+          "tag": "San Francisco Bay Area",
+          "link": "https://signal.nfx.com/investor-lists/top-san-francisco-bay-area-investors"
+        },
+        {
+          "tag": "Social Networks (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-social-networks-seed-investors"
+        },
+        {
+          "tag": "Investors who invested in diverse founders",
+          "link": "https://signal.nfx.com/investor-lists/top-who-invested-in-diverse-founders-investors"
+        },
+        {
+          "tag": "Investors who invested in female founders",
+          "link": "https://signal.nfx.com/investor-lists/top-who-invested-in-female-founders-investors"
+        },
+        {
+          "tag": "Investors who were founders",
+          "link": "https://signal.nfx.com/investor-lists/top-who-were-founders-investors"
+        }
+      ],
+      "investmentList": [
+        {
+          "companyName": "Shelf Engine",
+          "roundDetails": [
+            { "stage": "Series B", "date": "Mar 2021", "roundSize": "$41M" }
+          ],
+          "totalRaised": "$53M",
+          "coInvestors": [" Hans Tung (GGV Capital)"]
+        },
+        {
+          "companyName": "Cohere",
+          "roundDetails": [
+            { "stage": "Seed Round", "date": "Mar 2021", "roundSize": "$3M" }
+          ],
+          "totalRaised": "$3M",
+          "coInvestors": [
+            " Rahul Vohra (Todd and Rahul's Angel Fund)",
+            " Vivek Sodera (Vivek Sodera Ventures)"
+          ]
+        },
+        {
+          "companyName": "Rescale",
+          "roundDetails": [
+            { "stage": "Series C", "date": "Feb 2021", "roundSize": "$50M" },
+            { "stage": "Series B", "date": "Jul 2018", "roundSize": "$32M" },
+            { "stage": "Seed Round", "date": "Apr 2012" }
+          ],
+          "totalRaised": "$102.4M",
+          "coInvestors": [
+            " Peter Thiel (Founders Fund)",
+            " Chris Dixon (Andreessen Horowitz)",
+            " Ron Conway (SV Angel)",
+            " Ullas Naik (Streamlined Ventures)",
+            " Raj Sandhu (Great Oaks Venture Capital)",
+            " Saurabh Sharma (Jump Capital)",
+            " Carl Choi (Solasta Ventures)",
+            " Michael Jeon (Solasta Ventures)",
+            " Jeff Bezos",
+            " Ratan Singh",
+            " Sam Altman",
+            " Ashley Flucas",
+            " Richard Branson",
+            " Karl Jacob"
+          ]
+        },
+        {
+          "companyName": "Stacker",
+          "roundDetails": [
+            { "stage": "Seed Round", "date": "Jan 2021", "roundSize": "$1.7M" }
+          ],
+          "totalRaised": "$1.7M",
+          "coInvestors": [" Charlie Songhurst"]
+        },
+        {
+          "companyName": "Career Karma",
+          "roundDetails": [
+            { "stage": "Series A", "date": "Dec 2020", "roundSize": "$10M" }
+          ],
+          "totalRaised": "$11.9375M",
+          "coInvestors": [
+            " Brian Dixon (Kapor Capital)",
+            " Kim-Mai Cutler (Initialized Capital)",
+            " James Joaquin (Obvious Ventures)",
+            " Erik Torenberg (Village Global)",
+            " Michael Seibel (Y Combinator)",
+            " Jewel Burks (Collab Capital)",
+            " Fern Mandelbaum (Vista Venture Partners)",
+            " Kevin Lee",
+            " Caterina Fake",
+            " Edward Lando",
+            " Iman Abuzeid"
+          ]
+        },
+        {
+          "companyName": "Berbix",
+          "roundDetails": [
+            { "stage": "Series A", "date": "Aug 2020", "roundSize": "$9M" },
+            { "stage": "Seed Round", "date": "Jul 2019", "roundSize": "$2.5M" }
+          ],
+          "totalRaised": "$11.62M",
+          "coInvestors": [
+            " Patrick Salyer (Mayfield)",
+            " Tx Zhuo (Fika Ventures)",
+            " Alexia Bonatsos (Dream Machine)",
+            " Dalton Caldwell (Y Combinator)",
+            " Lenny Rachitsky"
+          ]
+        },
+        {
+          "companyName": "Bodyport",
+          "roundDetails": [
+            { "stage": "Series A", "date": "Aug 2020", "roundSize": "$11.2M" }
+          ],
+          "totalRaised": "$11.2M",
+          "coInvestors": []
+        },
+        {
+          "companyName": "Rippling",
+          "roundDetails": [
+            { "stage": "Series B", "date": "Aug 2020", "roundSize": "$145M" },
+            { "stage": "Series A", "date": "Apr 2019", "roundSize": "$45M" },
+            { "stage": "Seed Round", "date": "Mar 2017", "roundSize": "$7M" }
+          ],
+          "totalRaised": "$197M",
+          "coInvestors": [
+            " Napoleon Ta (Founders Fund)",
+            " Ben Ling (Bling Capital)",
+            " Arjun Sethi (Tribe Capital)",
+            " Ramtin Naimi (Abstract Ventures)",
+            " Dovey Wan (Danhua Capital)",
+            " Lee Linden (Quiet Capital)",
+            " Mamoon Hamid (Kleiner Perkins)",
+            " Sohail Prasad",
+            " Samvit Ramadurgam",
+            " Gianni Martire"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "Daniel Tovbin",
+    "investorProfileLink": "https://signal.nfx.com/investors/daniel-tovbin",
+    "firm": "Initialized Capital",
+    "position": "Associate",
+    "imgLink": "https://d18zd1fdi56ai5.cloudfront.net/variants/q55tir2e6f5u84t2kn1tr7c8qs6s/a503d4b2689155fa90a924b2812f95c3821865602a68447b0bbbaf6a00dd19a0?d=160x160",
+    "employeeDetails": {
+      "basicInfo": {
+        "name": "Daniel Tovbin",
+        "titles": ["VC", "Investor"],
+        "currJobTitle": "Venture Capital Associate at Initialized Capital"
+      },
+      "socialLinks": [
+        "https://www.initialized.com/who/daniel/",
+        "https://www.linkedin.com/in/daniel-tovbin-7ab655b9/",
+        "https://www.twitter.com/DanielTovbin",
+        "https://www.angel.co/u/daniel-tovbin",
+        "https://www.crunchbase.com/person/daniel-tovbin"
+      ],
+      "experienceData": [],
+      "summaryInfo": [
+        {
+          "label": "CURRENT INVESTING POSITION",
+          "value": "Initialized Capital  Associate"
+        },
+        { "label": "INVESTMENT RANGE", "value": "$1M - $4.0M" },
+        { "label": "SWEET SPOT", "value": "$2.5M" },
+        { "label": "CURRENT FUND SIZE", "value": "$1M" }
+      ],
+      "investorSectors": [
+        {
+          "tag": "Cloud Infrastructure (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-cloud-infrastructure-seed-investors"
+        },
+        {
+          "tag": "Consumer Internet (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-consumer-internet-seed-investors"
+        },
+        {
+          "tag": "New York City",
+          "link": "https://signal.nfx.com/investor-lists/top-new-york-city-investors"
+        },
+        {
+          "tag": "SaaS (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-saas-seed-investors"
+        }
+      ],
+      "investmentList": []
+    }
+  },
+  {
+    "name": "Jennifer Wolf",
+    "investorProfileLink": "https://signal.nfx.com/investors/jennifer-wolf",
+    "firm": "Initialized Capital",
+    "position": "President",
+    "imgLink": "https://d18zd1fdi56ai5.cloudfront.net/variants/lpvwqio0urlcz2ytjjhaqmfh3pg6/a503d4b2689155fa90a924b2812f95c3821865602a68447b0bbbaf6a00dd19a0?d=160x160",
+    "employeeDetails": {
+      "basicInfo": {
+        "name": "Jennifer Wolf",
+        "titles": ["VC", "Investor"],
+        "currJobTitle": "President & Partner at Initialized Capital"
+      },
+      "socialLinks": [
+        "https://www.initialized.com/who/jen/",
+        "https://www.linkedin.com/in/jenhwolf/",
+        "https://www.angel.co/u/jenhwolf",
+        "https://www.crunchbase.com/person/jennifer-wolf-2"
+      ],
+      "experienceData": [],
+      "summaryInfo": [
+        {
+          "label": "CURRENT INVESTING POSITION",
+          "value": "Initialized Capital  President"
+        },
+        { "label": "INVESTMENT RANGE", "value": "$1M - $4.0M" },
+        { "label": "SWEET SPOT", "value": "$2.5M" },
+        { "label": "INVESTMENTS ON RECORD", "value": "2" },
+        { "label": "CURRENT FUND SIZE", "value": "$1M" }
+      ],
+      "investorSectors": [
+        {
+          "tag": "BioTech (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-biotech-seed-investors"
+        },
+        {
+          "tag": "E-commerce (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-e-commerce-seed-investors"
+        },
+        {
+          "tag": "Enterprise (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-enterprise-seed-investors"
+        },
+        {
+          "tag": "Marketplaces (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-marketplaces-seed-investors"
+        },
+        {
+          "tag": "New York City",
+          "link": "https://signal.nfx.com/investor-lists/top-new-york-city-investors"
+        },
+        {
+          "tag": "SaaS (Seed)",
+          "link": "https://signal.nfx.com/investor-lists/top-saas-seed-investors"
+        }
+      ],
+      "investmentList": [
+        {
+          "companyName": "eqtble",
+          "roundDetails": [
+            { "stage": "Seed Round", "date": "Jun 2021", "roundSize": "$2.7M" }
+          ],
+          "totalRaised": "$2.7M",
+          "coInvestors": []
+        },
+        {
+          "companyName": "Narrator",
+          "roundDetails": [
+            { "stage": "Series A", "date": "Sep 2020", "roundSize": "$6.2M" }
+          ],
+          "totalRaised": "$6.2M",
+          "coInvestors": []
+        }
+      ]
+    }
+  }
+]
