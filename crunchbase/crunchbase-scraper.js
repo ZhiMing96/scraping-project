@@ -48,13 +48,18 @@ const handlePageGoTo = async (page, url, searchTerm) => {
     }
   }
 };
-const parseCrunchbase = async (ventureFirmName, folderToSaveTo) => {
+const parseCrunchbase = async (
+  ventureFirmName,
+  folderToSaveTo,
+  correctRedirectLink
+) => {
   if (!folderToSaveTo) return;
   const { browser, page } = await launchBrowser();
-  const urlName = ventureFirmName.toLowerCase().split(' ').join('-');
+  const urlName = correctRedirectLink
+    ? correctRedirectLink
+    : ventureFirmName.toLowerCase().split(' ').join('-');
   console.log(urlName);
-  const cbUrl = formatUrl(urlName);
-  // const cbUrl = formatUrl(urlName);
+  const cbUrl = formatUrl('storm-ventures');
   try {
     const investmentDetails = (await handleProfileTypes(page, cbUrl)) || {
       error: 'not found',
@@ -63,17 +68,16 @@ const parseCrunchbase = async (ventureFirmName, folderToSaveTo) => {
     const ventureInvestmentDetails = {};
     ventureInvestmentDetails[urlName] = investmentDetails;
     const stringifiedData = JSON.stringify(ventureInvestmentDetails);
-    fs.writeFile(
-      `./${folderToSaveTo}/${urlName}-crunch-base.json`,
-      stringifiedData,
-      (err) => {
-        if (err) throw err;
-        else
-          console.log(
-            `json file successfully generated at ${__dirname}/${folderToSaveTo}/${urlName}-crunch-base.json`
-          );
-      }
-    );
+    try {
+      fs.writeFileSync(
+        `./${folderToSaveTo}/${urlName}-crunch-base.json`,
+        stringifiedData,
+        { encoding: 'utf8', flag: 'w' }
+      );
+    } catch (err) {
+      console.log('FAILED TO SAVE FILE FOR INVESTOR', ventureFirmName);
+      console.log(err.message);
+    }
     await browser.close();
     return stringifiedData;
   } catch (err) {
@@ -123,12 +127,13 @@ const handlePageNotFound = async (searchTerm, page) => {
         `https://www.crunchbase.com/v4/data/autocompletes?query=${urlEncodeSearchTerm}&collection_ids=organizations&limit=5&source=topSearch`
       );
       const json = await res.json();
+      console.log('JSON: ', json);
       return json.entities;
     }, urlEncodeSearchTerm);
-
     const topResultPermaLink =
-      results.length > 0 ? results[0].identifier.permaLink : '';
-    if (topResultPermaLink === '') return;
+      results.length > 0 ? results[0].identifier.permalink : '';
+    if (!topResultPermaLink || topResultPermaLink === '') return;
+
     const data = fs.readFileSync('redirect-trace.json');
     const trace = JSON.parse(data);
     const obj = { from: searchTerm, to: topResultPermaLink };
@@ -343,10 +348,18 @@ const parseInvestmentDetails = async (page) => {
       }
     }
     let companyWithDetails;
-    const data = fs.readFileSync('orgdetails.json', {
-      encoding: 'utf8',
-      flag: 'r',
-    });
+    let data = {};
+    try {
+      data = fs.readFileSync('orgdetails.json', {
+        encoding: 'utf8',
+        flag: 'r',
+      });
+    } catch (err) {
+      console.log(
+        '!!!! did not read ordDetails for this investor',
+        err.message
+      );
+    }
     companyWithDetails = JSON.parse(data);
 
     for await (const investment of recentInvestments) {
@@ -371,14 +384,15 @@ const parseInvestmentDetails = async (page) => {
         continue;
       }
     }
-    fs.writeFile(
-      'orgdetails.json',
-      JSON.stringify(companyWithDetails),
-      (err) => {
-        if (err) throw err;
-        console.log('Saved!');
-      }
-    );
+    try {
+      fs.writeFileSync('orgdetails.json', JSON.stringify(companyWithDetails), {
+        encoding: 'utf8',
+        flag: 'w',
+      });
+      console.log('Saved new orgdetails!');
+    } catch (err) {
+      console.log('error saving orgDetails.json: ', err.message);
+    }
     for await (const investment of diversityInvestments) {
       try {
         const timeout = Math.random() * 1000;
@@ -402,14 +416,19 @@ const parseInvestmentDetails = async (page) => {
       }
     }
     if (diversityInvestments.length > 0) {
-      fs.writeFile(
-        'orgdetails.json',
-        JSON.stringify(companyWithDetails),
-        (err) => {
-          if (err) throw err;
-          console.log('Saved!');
-        }
-      );
+      try {
+        fs.writeFileSync(
+          'orgdetails.json',
+          JSON.stringify(companyWithDetails),
+          {
+            encoding: 'utf8',
+            flag: 'w',
+          }
+        );
+        console.log('Saved new orgdetails!');
+      } catch (err) {
+        console.log('error saving orgDetails.json: ', err.message);
+      }
     }
     for await (const exit of notableExits) {
       try {
@@ -431,14 +450,19 @@ const parseInvestmentDetails = async (page) => {
       }
     }
     if (notableExits.length > 0) {
-      fs.writeFile(
-        'orgdetails.json',
-        JSON.stringify(companyWithDetails),
-        (err) => {
-          if (err) throw err;
-          console.log('Saved!');
-        }
-      );
+      try {
+        fs.writeFileSync(
+          'orgdetails.json',
+          JSON.stringify(companyWithDetails),
+          {
+            encoding: 'utf8',
+            flag: 'w',
+          }
+        );
+        console.log('Saved new orgdetails!');
+      } catch (err) {
+        console.log('error saving orgDetails.json: ', err.message);
+      }
     }
 
     return {
@@ -657,7 +681,7 @@ const getEmplopyeePageDetails = async (page) => {
     }
   });
 };
-// parseCrunchbase('Golden Equator Group');
+// parseCrunchbase('Calm/Storm Ventures', 'germany-investors');
 // parseCrunchbase('Spiral Ventures');
 // getOrgDetails('https://www.crunchbase.com/organization/superbottoms');
 module.exports = { parseCrunchbase, getOrgDetails };

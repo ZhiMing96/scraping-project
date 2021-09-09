@@ -1,0 +1,39 @@
+[
+  {
+    "from": "cgs-private-equity",
+    "to": "elbrus-capital",
+    "correct": "cgs-management"
+  },
+  {
+    "from": "crescera-capital",
+    "to": "crescent-capital-group",
+    "correct": "bozano-investimentos"
+  },
+  {
+    "from": "ieurope",
+    "to": "ieurope-broadcasting",
+    "correct": "ieurope-capital"
+  },
+  {
+    "from": "investiere",
+    "to": "traden-und-investieren",
+    "correct": "verve-ventures"
+  },
+  { "from": "j&t-ventures", "to": "janssen", "correct": "j-t-ventures" },
+  {
+    "from": "mubadala",
+    "to": "mubadala-investment-company-e9c0",
+    "correct": "mubadala-ventures"
+  },
+  { "from": "isai-france", "to": "france-24", "correct": "isai" },
+  {
+    "from": "neeraj-berry",
+    "to": "berry-global-inc",
+    "correct": "tet-ventures"
+  },
+  {
+    "from": "newfund-capital",
+    "to": "ince-capital",
+    "correct": "newfund-management"
+  }
+]
