@@ -28,7 +28,8 @@ Web Scrapper project for consolidating news sources and company financials, with
   
  **To Scrape and Process Info** 
  1. fill in all the necessary paths to `scrapeAndProcessData` method in `main.js`
- 2. run  
+ - `migrationDirectory`, `filePathToInvestors`, `folderToSaveData`
+ 3. run  
  ``` 
  node main.js
  ```
