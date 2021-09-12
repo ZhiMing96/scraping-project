@@ -14,42 +14,37 @@ const {
 
 const fs = require('fs');
 
+const migrationDirectory = './migrations';
+const filePathToInvestors = '/confidential/investorsInSingapore.json';
+const folderToSaveData = './scrapped-investors';
+
 const scrapeAndProcessData = async () => {
   try {
-    if (!fs.existsSync('./migrations')) {
-      fs.mkdirSync('./migrations');
+    if (!fs.existsSync(`${migrationDirectory}`)) {
+      fs.mkdirSync(`${migrationDirectory}`);
     }
-    if (!fs.existsSync('./scrapped-investors')) {
-      fs.mkdirSync('./scrapped-investors');
+    if (!fs.existsSync(`${folderToSaveData}`)) {
+      fs.mkdirSync(`${folderToSaveData}`);
     }
 
-    await fetchInvestorProfiles(
-      '/confidential/investorsInSingapore.json',
-      'scrapped-investors'
-    );
+    await fetchInvestorProfiles(filePathToInvestors, folderToSaveData);
 
-    removeCorrectRedirects(
-      '/confidential/investorsInSingapore.json',
-      'scrapped-investors'
-    );
+    removeCorrectRedirects(filePathToInvestors, folderToSaveData);
     await fixOrgDetails();
-    generateOrgDetailSQLInsert('/migrations');
-    await cleanUpInvestmentJank(
-      '/confidential/investorsInSingapore.json',
-      'scrapped-investors'
-    );
+    generateOrgDetailSQLInsert(migrationDirectory);
+    await cleanUpInvestmentJank(filePathToInvestors, folderToSaveData);
     await processInvestmentHistory(
-      '/migrations',
-      '/confidential/investorsInSingapore.json',
-      'scrapped-investors'
+      migrationDirectory,
+      filePathToInvestors,
+      folderToSaveData
     );
     generalDownMigrationForNewlyAddedPortcos(
-      '/migrations',
-      '/confidential/investorsInSingapore.json'
+      migrationDirectory,
+      filePathToInvestors
     );
     generalDownMigrationForInvestorProfilesEdits(
-      '/migrations',
-      '/confidential/investorsInSingapore.json'
+      migrationDirectory,
+      filePathToInvestors
     );
   } catch (err) {
     console.log('Failed to process all investments: ', err.message);
