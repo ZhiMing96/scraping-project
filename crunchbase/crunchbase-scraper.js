@@ -27,11 +27,26 @@ const launchBrowser = async () => {
   return { browser, page };
 };
 const handlePageGoTo = async (page, url, searchTerm) => {
-  // handle captcha and notfound
+  // handle captcha and page notfound
   const timeout = Math.random() * 3000;
   console.log('navigating to url: ', url);
-  await page.goto(url, { timeout: 0 });
-  await page.waitForTimeout(timeout);
+  try {
+    await page.goto(url, { timeout: 15000 });
+    await page.waitForTimeout(timeout);
+  } catch (err) {
+    console.log('Error - Navigation Timeout: ', err.message);
+    await page.waitForTimeout(5000);
+    console.log('Reloading after 5s...');
+    try {
+      await page.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] });
+    } catch (err) {
+      await page.screenshot({ path: `./${searchTerm}.jpeg`, type: 'jpeg' });
+      console.error(
+        `please refer to screenshot taken here ${__dirname}/${searchTerm}-second-redirect-jank.jpeg`
+      );
+      console.log('Timeout Error After Reload: ', err.message);
+    }
+  }
 
   console.log('navigated');
   try {
@@ -59,7 +74,7 @@ const parseCrunchbase = async (
     ? correctRedirectLink
     : ventureFirmName.toLowerCase().split(' ').join('-');
   console.log(urlName);
-  const cbUrl = formatUrl('storm-ventures');
+  const cbUrl = formatUrl(urlName);
   try {
     const investmentDetails = (await handleProfileTypes(page, cbUrl)) || {
       error: 'not found',
@@ -81,7 +96,11 @@ const parseCrunchbase = async (
     await browser.close();
     return stringifiedData;
   } catch (err) {
-    console.error('parseCrunchbase error: ', err);
+    console.error('parseCrunchbase error: ', err.message);
+    await page.screenshot({ path: `./${urlName}.jpeg`, type: 'jpeg' });
+    console.error(
+      `please refer to screenshot taken here ${__dirname}/${urlName}.jpeg`
+    );
     await browser.close();
     return;
   }
@@ -107,7 +126,7 @@ const crunchbaseCaptchaBypass = async (page) => {
 
 const checkForPageNotFound = async (page) => {
   try {
-    await page.waitForSelector('page-not-found', { timeout: 1000 });
+    await page.waitForSelector('page-not-found', { timeout: 2000 });
     return true;
   } catch (e) {
     return false;
@@ -182,6 +201,7 @@ const handleParseInvestmentsRedirect = async (page) => {
   const timeout = Math.random() * 1000;
   await page.waitForTimeout(timeout);
   await page.waitForSelector('div.mat-tab-link-container');
+  const orgDetails = await parseOrgDetails(page);
   const tabNavigations = await page.$$eval('div.mat-tab-links > a', (tabs) =>
     tabs.map((tab) => ({ value: tab.innerText.toLowerCase(), link: tab.href }))
   );
@@ -196,7 +216,6 @@ const handleParseInvestmentsRedirect = async (page) => {
       linkWithInvestmentDetails = tabLink;
       break;
     } else if (tabValue === 'summary') {
-      const orgDetails = await getOrgDetails(tabLink);
       return orgDetails;
     } else {
       continue;
@@ -206,6 +225,7 @@ const handleParseInvestmentsRedirect = async (page) => {
   // console.log('redirecting to url: ', linkWithInvestmentDetails);
   await handlePageGoTo(page, linkWithInvestmentDetails, '');
   const investmentDetails = await parseInvestmentDetails(page);
+  if (investmentDetails) investmentDetails['orgDetails'] = orgDetails;
   return investmentDetails;
 };
 
@@ -361,6 +381,7 @@ const parseInvestmentDetails = async (page) => {
       );
     }
     companyWithDetails = JSON.parse(data);
+    let newOrgsAdded = 0;
 
     for await (const investment of recentInvestments) {
       try {
@@ -378,6 +399,7 @@ const parseInvestmentDetails = async (page) => {
           orgNameWithLink.orgDetails = orgDetails;
           investment['Organization Name'] = orgNameWithLink;
           companyWithDetails[permaLink] = orgDetails;
+          newOrgsAdded++;
         }
       } catch (e) {
         console.log(e);
@@ -385,14 +407,22 @@ const parseInvestmentDetails = async (page) => {
       }
     }
     try {
-      fs.writeFileSync('orgdetails.json', JSON.stringify(companyWithDetails), {
-        encoding: 'utf8',
-        flag: 'w',
-      });
-      console.log('Saved new orgdetails!');
+      console.log('New Orgs parsed: ', newOrgsAdded);
+      if (newOrgsAdded > 0) {
+        fs.writeFileSync(
+          'orgdetails.json',
+          JSON.stringify(companyWithDetails),
+          {
+            encoding: 'utf8',
+            flag: 'w',
+          }
+        );
+        console.log('Saved new orgdetails!');
+      }
     } catch (err) {
       console.log('error saving orgDetails.json: ', err.message);
     }
+    newOrgsAdded = 0;
     for await (const investment of diversityInvestments) {
       try {
         const timeout = Math.random() * 1000;
@@ -409,6 +439,7 @@ const parseInvestmentDetails = async (page) => {
           orgNameWithLink.orgDetails = orgDetails;
           investment['Organization Name'] = orgNameWithLink;
           companyWithDetails[permaLink] = orgDetails;
+          newOrgsAdded++;
         }
       } catch (e) {
         console.log(e);
@@ -417,19 +448,23 @@ const parseInvestmentDetails = async (page) => {
     }
     if (diversityInvestments.length > 0) {
       try {
-        fs.writeFileSync(
-          'orgdetails.json',
-          JSON.stringify(companyWithDetails),
-          {
-            encoding: 'utf8',
-            flag: 'w',
-          }
-        );
-        console.log('Saved new orgdetails!');
+        console.log('New Orgs parsed: ', newOrgsAdded);
+        if (newOrgsAdded > 0) {
+          fs.writeFileSync(
+            'orgdetails.json',
+            JSON.stringify(companyWithDetails),
+            {
+              encoding: 'utf8',
+              flag: 'w',
+            }
+          );
+          console.log('Saved new orgdetails!');
+        }
       } catch (err) {
         console.log('error saving orgDetails.json: ', err.message);
       }
     }
+    newOrgsAdded = 0;
     for await (const exit of notableExits) {
       try {
         const timeout = Math.random() * 1000;
@@ -443,6 +478,7 @@ const parseInvestmentDetails = async (page) => {
           const orgDetails = await getOrgDetails(exit.companyCBProfileUrl);
           exit.orgDetails = orgDetails;
           companyWithDetails[permaLink] = orgDetails;
+          newOrgsAdded++;
         }
       } catch (e) {
         console.log(e);
@@ -451,15 +487,18 @@ const parseInvestmentDetails = async (page) => {
     }
     if (notableExits.length > 0) {
       try {
-        fs.writeFileSync(
-          'orgdetails.json',
-          JSON.stringify(companyWithDetails),
-          {
-            encoding: 'utf8',
-            flag: 'w',
-          }
-        );
-        console.log('Saved new orgdetails!');
+        console.log('New Orgs parsed: ', newOrgsAdded);
+        if (newOrgsAdded > 0) {
+          fs.writeFileSync(
+            'orgdetails.json',
+            JSON.stringify(companyWithDetails),
+            {
+              encoding: 'utf8',
+              flag: 'w',
+            }
+          );
+          console.log('Saved new orgdetails!');
+        }
       } catch (err) {
         console.log('error saving orgDetails.json: ', err.message);
       }
@@ -491,10 +530,16 @@ const getOrgDetails = async (url) => {
     return orgDetails;
   } catch (err) {
     console.log('getOrgDetails Error:', err);
-    const htmlContent = await page.content();
-    console.log('html of error page: ', htmlContent);
+    await page.screenshot({ path: `./${searchTerm}.jpeg`, type: 'jpeg' });
+    console.error(
+      `please refer to screenshot taken here ${__dirname}/${searchTerm}.jpeg`
+    );
     await browser.close();
-    return { error: err.message, html: htmlContent };
+    return {
+      error: err.message,
+      screenshotPath: `./${searchTerm}.jpeg`,
+      html: htmlContent,
+    };
   }
 };
 
@@ -545,8 +590,13 @@ const parseOrgDetails = async (page) => {
       orgSummary[key] = values[i];
     }
     try {
+      let highlightSpanId =
+        profileType.toLowerCase() === 'investment firm'
+          ? 'span#investor_overview_highlights'
+          : 'span#company_overview_highlights';
+
       const highlights = await page.$eval(
-        'profile-section > span#company_overview_highlights',
+        `profile-section > ${highlightSpanId}`,
         (el) => {
           const highlightsNode = el.parentNode;
           const highlightChips = highlightsNode.querySelectorAll(
@@ -571,7 +621,7 @@ const parseOrgDetails = async (page) => {
       );
       orgSummary['highlights'] = highlights;
     } catch (e) {
-      console.log('No Highlights');
+      console.log('No Highlights', e.message);
     }
 
     const detailsSection = await page.$(
@@ -618,70 +668,70 @@ const parseOrgDetails = async (page) => {
   }
 };
 
-const getFundingDetails = async (page) => {
-  let url =
-    'https://www.crunchbase.com/organization/wavemaker-partners/investor_financials';
-  await page.goto(url);
+// const getFundingDetails = async (page) => {
+//   let url =
+//     'https://www.crunchbase.com/organization/wavemaker-partners/investor_financials';
+//   await page.goto(url);
 
-  try {
-    crunchbaseCaptchaBypass(page);
-    getFundingPageDetails(page);
-  } catch (e) {
-    getFundingPageDetails(page);
-  }
-};
+//   try {
+//     crunchbaseCaptchaBypass(page);
+//     getFundingPageDetails(page);
+//   } catch (e) {
+//     getFundingPageDetails(page);
+//   }
+// };
 
-const getFundingPageDetails = async (page) => {
-  const sectionsOfText = await page.$$('div.section-content');
-  const fundingSummarySection = await sectionsOfText[1].$$eval(
-    'field-formatter.ng-star-inserted',
-    (texts) => texts.map((text) => text.innerText)
-  );
-  let fundingTextConnectors = [
-    'has raised a total of ',
-    ' across ',
-    ' funds, their latest being ',
-    '. This fund was announced on ',
-    ', and raised a total of ',
-  ];
-  let fundingSummary = '';
-  for (let i = 0; i < fundingSummarySection.length; i++) {
-    if (i <= fundingTextConnectors.length && i > 0) {
-      fundingSummary =
-        fundingSummary + financialStatements[i - 1] + fundingDetails[i];
-    } else {
-      fundingSummary = fundingSummary + fundingDetails[i];
-    }
-  }
-  console.log(fundingSummary);
-  return;
-};
+// const getFundingPageDetails = async (page) => {
+//   const sectionsOfText = await page.$$('div.section-content');
+//   const fundingSummarySection = await sectionsOfText[1].$$eval(
+//     'field-formatter.ng-star-inserted',
+//     (texts) => texts.map((text) => text.innerText)
+//   );
+//   let fundingTextConnectors = [
+//     'has raised a total of ',
+//     ' across ',
+//     ' funds, their latest being ',
+//     '. This fund was announced on ',
+//     ', and raised a total of ',
+//   ];
+//   let fundingSummary = '';
+//   for (let i = 0; i < fundingSummarySection.length; i++) {
+//     if (i <= fundingTextConnectors.length && i > 0) {
+//       fundingSummary =
+//         fundingSummary + financialStatements[i - 1] + fundingDetails[i];
+//     } else {
+//       fundingSummary = fundingSummary + fundingDetails[i];
+//     }
+//   }
+//   console.log(fundingSummary);
+//   return;
+// };
 
-const getEmployeeDetails = async (page) => {
-  let url = 'https://www.crunchbase.com/organization/wavemaker-partners/people';
-  await page.goto(url);
-  try {
-    await crunchbaseCaptchaBypass(page);
-    await getEmplopyeePageDetails(page);
-  } catch (e) {
-    await getEmplopyeePageDetails(page);
-  }
-};
+// const getEmployeeDetails = async (page) => {
+//   let url = 'https://www.crunchbase.com/organization/wavemaker-partners/people';
+//   await page.goto(url);
+//   try {
+//     await crunchbaseCaptchaBypass(page);
+//     await getEmplopyeePageDetails(page);
+//   } catch (e) {
+//     await getEmplopyeePageDetails(page);
+//   }
+// };
 
-const getEmplopyeePageDetails = async (page) => {
-  await page.setRequestInterception(true);
-  page.on('request', (interceptedRequest) => {
-    interceptedRequest.continue();
-  });
-  page.on('response', async (response) => {
-    const request = response.request();
-    if (request.url().includes('contacts?source=profile-contacts-card')) {
-      console.log(`---------- ${request.url()} -------------`);
-      console.log(response.json());
-    }
-  });
-};
-// parseCrunchbase('Calm/Storm Ventures', 'germany-investors');
+// const getEmplopyeePageDetails = async (page) => {
+//   await page.setRequestInterception(true);
+//   page.on('request', (interceptedRequest) => {
+//     interceptedRequest.continue();
+//   });
+//   page.on('response', async (response) => {
+//     const request = response.request();
+//     if (request.url().includes('contacts?source=profile-contacts-card')) {
+//       console.log(`---------- ${request.url()} -------------`);
+//       console.log(response.json());
+//     }
+//   });
+// };
+// parseCrunchbase('kindred-capital', 'sg-investors');
 // parseCrunchbase('Spiral Ventures');
 // getOrgDetails('https://www.crunchbase.com/organization/superbottoms');
 module.exports = { parseCrunchbase, getOrgDetails };

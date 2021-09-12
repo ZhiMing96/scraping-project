@@ -1,41 +1,76 @@
-const sgInvestors = require('./investorProfiles/Singapore_Investors.json');
-const phInvestors = require('./investorProfiles/Philippines_Investors.json');
-const mlInvestors = require('./investorProfiles/Malaysia_Investors.json');
-const idInvestors = require('./investorProfiles/India_Investors.json');
-const hkInvestors = require('./investorProfiles/HK_Investors.json');
-const jpnInvestors = require('./investorProfiles/Japan_Tokyo_investors.json');
-const germanyInvestors = require('./investorProfiles/Germany_investors.json');
+const sgInvestors = require('./confidential/investorProfiles/Singapore_Investors.json');
+const phInvestors = require('./confidential/investorProfiles/Philippines_Investors.json');
+const mlInvestors = require('./confidential/investorProfiles/Malaysia_Investors.json');
+const idInvestors = require('./confidential/investorProfiles/India_Investors.json');
+const hkInvestors = require('./confidential/investorProfiles/HK_Investors.json');
+const jpnInvestors = require('./confidential/investorProfiles/Japan_Tokyo_investors.json');
+// const investorsInSg = require('./investorProfiles/Germany_investors.json');
+const investorsInSg = require('./investorsInSingapore.json');
 const fs = require('fs');
 const orgDetails = require('./orgdetails.json');
-const investorsParsed = require('./allInvestorsParsed.json');
+const existingOrgDetails = require('./orgdetails-old.json');
+const investorsParsed = require('./investorsParsed.json');
 const redirects = require('./redirect-trace.json');
 const onigiriOrgs = require('./onigiri_orgs.json');
 
 const { parseCrunchbase, getOrgDetails } = require('./crunchbase-scraper');
 
+const removeJankyOrg = () => {
+  delete orgDetails['gainspan'];
+  fs.writeFileSync('orgdetails1.json', JSON.stringify(orgDetails));
+};
+// removeJankyOrg();
+
+const removeCorrectRedirects = () => {
+  const investorToWebsite = investorsInSg.investor_profiles.reduce(
+    (acc, { website_url, name }) => {
+      const formattedName = name.toLowerCase().split(' ').join('-');
+      acc[formattedName] = website_url;
+      return acc;
+    },
+    {}
+  );
+  const filteredRedirects = redirects.filter(({ from, to, correct }) => {
+    if (correct) return true;
+    const parsedData = require(`./sg-investors/${from}-crunch-base.json`);
+    const info = parsedData[from];
+
+    if (!info.website && !info['orgDetails']) return true;
+
+    const toSite = info.website ? info.website : info['orgDetails'].website;
+
+    const fromWebsite = investorToWebsite[from]
+      .split('/')
+      .join('')
+      .replace('www.', '')
+      .split(':')
+      .pop();
+    const toWebsite = toSite
+      .split('/')
+      .join('')
+      .replace('www.', '')
+      .split(':')
+      .pop();
+    console.log(`fromWebsite: ${fromWebsite}, toWebsite: ${toWebsite}`);
+    if (fromWebsite === toWebsite) {
+      console.log('MATCH IDENTIFIED.');
+      return false;
+    }
+    return true;
+  });
+  fs.writeFileSync('redirect-trace.json', JSON.stringify(filteredRedirects));
+};
+
 const repopulateRedirects = async () => {
   for await (const info of redirects) {
     console.log('------- fetching info for: ', info.from);
-    await parseCrunchbase(info.from, 'germany-investors', info.correct);
+    await parseCrunchbase(info.from, 'sg-investors', info.correct);
     console.log('------- done -------');
   }
 };
-// repopulateRedirects();
+
 const fetchInvestorProfiles = async () => {
-  const investorList = germanyInvestors.investor_profiles;
-  const names = [
-    // 'Act Venture Capital',
-    'Baird Capital',
-    // 'BMW i Ventures',
-    // 'Dynamo Ventures',
-    'eCAPITAL Entrepreneurial Partners',
-    'Force Over Mass',
-    'Industrifonden',
-    'Innovacom',
-    // '3M Ventures',
-    // 'Prime Ventures',
-    // 'Vertex Ventures',
-  ];
+  const investorList = investorsInSg.investor_profiles;
 
   console.log('num of investors in list: ', investorList.length);
   for await (const investor of investorList) {
@@ -43,11 +78,9 @@ const fetchInvestorProfiles = async () => {
       console.log('Investor already parsed: ', investor.name);
       continue;
     }
-    if (names.includes(investor.name)) {
-      console.log('------- fetching info for: ', investor.name);
-      await parseCrunchbase(investor.name, 'germany-investors');
-      console.log('------- done -------');
-    }
+    console.log('------- fetching info for: ', investor.name);
+    await parseCrunchbase(investor.name, 'sg-investors');
+    console.log('------- done -------');
   }
 };
 // fetchInvestorProfiles();
@@ -58,6 +91,8 @@ const fixSingleOrgDetail = async (detail) => {
   );
   orgDetails[detail] = orgDetail;
   fs.writeFileSync('orgdetails.json', JSON.stringify(orgDetails));
+  console.log('saved');
+  return orgDetail;
 };
 // fixSingleOrgDetail('global-risk-partners');
 
@@ -73,10 +108,7 @@ const fixOrgDetails = async () => {
     }
   }
 
-  // fs.writeFile('orgdetails.json', JSON.stringify(orgDetails), (err) => {
-  //   if (err) throw err;
-  //   console.log('Saved!');
-  // });
+  fs.writeFileSync('orgdetails.json', JSON.stringify(orgDetails));
 };
 // fixOrgDetails();
 
@@ -90,9 +122,11 @@ const parseOrgDetails = () => {
     'website',
     'cbRank',
   ];
+  const existingOrgs = Object.keys(existingOrgDetails).map((key) => key);
   for (const detail in orgDetails) {
     const details = orgDetails[detail];
-    if (onigiriOrgs.includes(detail)) {
+    if (existingOrgs.includes(detail)) {
+      // only because orgDetail is not saved to file.
       delete orgDetails[detail];
       continue;
     }
@@ -127,13 +161,11 @@ const parseOrgDetails = () => {
   }
 
   return orgDetails;
-
-  // fs.writeFileSync('orgDetailsForInsertion.json', JSON.stringify(orgDetails));
-  // console.log('Saved!');
 };
 // parseOrgDetails();
 
-const generateOrgDetailSQLInsert = () => {
+const generateOrgDetailSQLInsert = (directory) => {
+  directory = directory ? directory : '';
   const keys = [
     'permaLink',
     'orgName',
@@ -177,18 +209,18 @@ const generateOrgDetailSQLInsert = () => {
         values += info + ', ';
       }
     });
-    // values = values.slice(0, -2) + '),\n';
     values += "'CRUNCHBASE'" + '),\n';
     sql += values;
   }
   sql = sql.trim();
   sql = sql.slice(0, -1) + ';';
   // console.log(sql);
-  fs.writeFileSync('insertAllPortco.sql', sql);
+  fs.writeFileSync(`.${directory}/insertAllPortco.sql`, sql);
 };
-generateOrgDetailSQLInsert();
+// generateOrgDetailSQLInsert();
 
 const generateInsertSqlForHighlights = (
+  directory,
   queryToGetInvestorProfileId,
   totalInvestments,
   totalLeadCount,
@@ -205,23 +237,30 @@ const generateInsertSqlForHighlights = (
     totalDiversityInvestment ? parseInt(totalDiversityInvestment) : null
   } WHERE id = (${queryToGetInvestorProfileId});\n`;
 
-  let data = fs.readFileSync('./updateInvestorProfileHighlights.sql', {
-    encoding: 'utf8',
-    flag: 'r',
-  });
+  let data = fs.readFileSync(
+    `.${directory}/updateInvestorProfileHighlights.sql`,
+    {
+      encoding: 'utf8',
+      flag: 'r',
+    }
+  );
   data += sql;
-  fs.writeFileSync('./updateInvestorProfileHighlights.sql', data);
+  fs.writeFileSync(`.${directory}/updateInvestorProfileHighlights.sql`, data);
 };
 
-const generateDiversityUpdateScripts = (orgPermaLink, diversityTag) => {
+const generateDiversityUpdateScripts = (
+  directory,
+  orgPermaLink,
+  diversityTag
+) => {
   const sql = `UPDATE onigiri.portfolio_companies SET diversity_tag = '${diversityTag}' WHERE unique_identifier = '${orgPermaLink}';\n`;
 
-  let data = fs.readFileSync('./updatePortcoDiversity.sql', {
+  let data = fs.readFileSync(`.${directory}/updatePortcoDiversity.sql`, {
     encoding: 'utf8',
     flag: 'r',
   });
   data += sql;
-  fs.writeFileSync('./updatePortcoDiversity.sql', data);
+  fs.writeFileSync(`.${directory}/updatePortcoDiversity.sql`, data);
 };
 
 const getPermaLinkFromOrgName = (orgName) => {
@@ -234,13 +273,23 @@ const getPermaLinkFromOrgName = (orgName) => {
   console.log('Key not found for org', orgName);
 };
 
-const processInvestmentHistory = () => {
+const processInvestmentHistory = async (directory) => {
+  directory = directory ? directory : '';
   let bulkInsertStatement = `INSERT INTO onigiri.investments (announcement_date,funding_round,amt_raised,is_lead,org_identifier, investment_type, investor_profiles_id, portfolio_companies_id, data_source) VALUES\n`;
-  fs.truncateSync('./updateInvestorProfileHighlights.sql');
-  // fs.truncateSync('./singapore-insertion/updatePortcoDiversity copy.sql');
-  germanyInvestors.investor_profiles.forEach((investor) => {
+  fs.writeFileSync(`.${directory}/updateInvestorProfileHighlights.sql`, '');
+  fs.writeFileSync(`.${directory}/updatePortcoDiversity.sql`, '');
+  fs.truncateSync(`.${directory}/updateInvestorProfileHighlights.sql`);
+  fs.truncateSync(`.${directory}/updatePortcoDiversity.sql`);
+  fs.writeFileSync(`.${directory}/investors-with-error.json`, '[]');
+
+  const investors = investorsInSg.investor_profiles;
+
+  for await (let investor of investors) {
     const name = investor.name;
-    // const investorProfileId = investor.id;
+    if (investorsParsed.includes(name)) {
+      console.log('Investor already parsed: ', investor.name);
+      continue;
+    }
     const location = investor.headquarter_location;
     const processedName = name.split("'").join("''");
     const processedLocation = location.split("'").join("''");
@@ -248,16 +297,24 @@ const processInvestmentHistory = () => {
     const queryToGetInvestorProfileId = `SELECT id FROM onigiri.investor_profiles WHERE "name" = '${processedName}' AND headquarter_location = '${processedLocation}'`;
 
     const fileName = name.toLowerCase().split(' ').join('-');
-    const path = `./germany-investors/${fileName}-crunch-base.json`;
+    const path = `./sg-investors/${fileName}-crunch-base.json`;
     console.log(path);
-    // try {
-    // } catch (err) {}
     const data = fs.readFileSync(path, { encoding: 'utf8', flag: 'r' });
     const allInvestmentInfo = JSON.parse(data);
     const investmentInfo = allInvestmentInfo[fileName];
     if (investmentInfo.error) {
+      const data = fs.readFileSync(`.${directory}/investors-with-error.json`, {
+        flag: 'r',
+        encoding: 'utf8',
+      });
+      const names = JSON.parse(data);
+      names.push(name);
+      fs.writeFileSync(
+        `.${directory}/investors-with-error.json`,
+        JSON.stringify(names)
+      );
       console.log('!!!!!!!!!! Skipping This investor because of error: ', name);
-      return;
+      continue;
     }
 
     let {
@@ -275,6 +332,7 @@ const processInvestmentHistory = () => {
       const totalDiversityInvestment =
         investmentHighlights['Diversity Investments'];
       generateInsertSqlForHighlights(
+        directory,
         queryToGetInvestorProfileId,
         totalInvestments,
         totalLeadCount,
@@ -323,7 +381,7 @@ const processInvestmentHistory = () => {
       const orgSection = investment['Organization Name'];
       const permaLink = orgSection ? orgSection.orgDetails.permaLink : null;
       const diversityTag = investment['Diversity Spotlight (US Only)'].value;
-      generateDiversityUpdateScripts(permaLink, diversityTag);
+      generateDiversityUpdateScripts(directory, permaLink, diversityTag);
     });
 
     const filteredDiversityInvestments = diversityInvestments.map(
@@ -336,7 +394,6 @@ const processInvestmentHistory = () => {
             : investment['Money Raised'].value;
         const orgSection = investment['Organization Name'];
         const permaLink = orgSection ? orgSection.orgDetails.permaLink : null;
-        console.log('permaLink', permaLink);
         return {
           announcementDate,
           fundingRound,
@@ -347,30 +404,35 @@ const processInvestmentHistory = () => {
         };
       }
     );
-    const filteredExitsInvestments = notableExits.map((company) => {
-      const orgDetail = company.orgDetails;
+    const filteredExitsInvestments = [];
+
+    for await (const company of notableExits) {
+      let orgDetail = company.orgDetails;
       if (!orgDetail) {
         console.log('GGWP orgDetails key not in notable exit', company);
+        const link = company.companyCBProfileUrl.split('/').pop();
+        orgDetail = await fixSingleOrgDetail(link);
+        console.log('fixed');
       }
       if (orgDetail.error) {
         console.log('GG org in notable exit not fixed', orgDetail.permaLink);
-        return;
+        continue;
       }
       if (!orgDetail.permaLink) {
         console.log('no permaLink for org', orgDetail.orgName);
         const identifier = getPermaLinkFromOrgName(orgDetail.orgName);
-        if (!identifier) return;
+        if (!identifier) continue;
         orgDetail.permaLink = identifier;
       }
-      return {
+      filteredExitsInvestments.push({
         announcementDate: null,
         fundingRound: null,
         amtRaised: null,
         isLead: null,
         orgIdentifier: orgDetail.permaLink,
         type: 'Unknown',
-      };
-    });
+      });
+    }
 
     filteredRecentInvestments
       .concat(filteredDiversityInvestments)
@@ -404,12 +466,15 @@ const processInvestmentHistory = () => {
         tmpString += '(' + queryToGetOrgProfileId + "), 'CRUNCHBASE'),\n";
         bulkInsertStatement += tmpString;
       });
-  });
+  }
   bulkInsertStatement = bulkInsertStatement.trim();
   bulkInsertStatement = bulkInsertStatement.slice(0, -1) + ';';
   // console.log(bulkInsertStatement);
   try {
-    fs.writeFileSync('./insertInvestmentHistory copy.sql', bulkInsertStatement);
+    fs.writeFileSync(
+      `.${directory}/insertInvestmentHistory.sql`,
+      bulkInsertStatement
+    );
     console.log('saved file');
   } catch (e) {
     console.error(err);
@@ -423,19 +488,25 @@ const processInvestmentHistory = () => {
 
 // getInvestmentDetails('mystartr', 'india-investors');
 
-const cleanUpInvestmentJank = () => {
-  germanyInvestors.investor_profiles.forEach((investor) => {
+const cleanUpInvestmentJank = async () => {
+  const investors = investorsInSg.investor_profiles;
+
+  for await (let investor of investors) {
     const name = investor.name;
+    if (investorsParsed.includes(name)) {
+      console.log('Investor already parsed: ', investor.name);
+      continue;
+    }
 
     const fileName = name.toLowerCase().split(' ').join('-');
-    const path = `./germany-investors/${fileName}-crunch-base.json`;
+    const path = `./sg-investors/${fileName}-crunch-base.json`;
     console.log('parsing this now:', path);
     const data = fs.readFileSync(path, { encoding: 'utf8', flag: 'r' });
     const allInvestmentInfo = JSON.parse(data);
     investmentInfo = allInvestmentInfo[fileName];
     if (investmentInfo.error) {
       console.log('!!!!!!!!!! This investor has an error: ', name);
-      return;
+      continue;
     }
     let {
       recentInvestments,
@@ -462,28 +533,38 @@ const cleanUpInvestmentJank = () => {
         delete investmentHighlights[oldKey];
       });
     }
-    recentInvestments =
-      recentInvestments &&
-      recentInvestments.map((investment) => fix(investment));
-    diversityInvestments =
-      diversityInvestments &&
-      diversityInvestments.map((investment) => fix(investment));
+
+    if (recentInvestments) {
+      for await (let investment of recentInvestments) {
+        investment = await fix(investment);
+      }
+    }
+
+    if (diversityInvestments) {
+      for await (let investment of diversityInvestments) {
+        investment = await fix(investment);
+      }
+    }
+
     investmentInfo.recentInvestments = recentInvestments;
     investmentInfo.diversityInvestments = diversityInvestments;
     if (notableExits) {
-      notableExits.forEach((company) => {
-        const orgDetail = company.orgDetails;
+      for await (const company of notableExits) {
+        let orgDetail = company.orgDetails;
         if (!orgDetail) {
           console.log('GGWP orgDetails key not in notable exit', company);
+          const link = company.companyCBProfileUrl.split('/').pop();
+          orgDetail = await fixSingleOrgDetail(link);
+          console.log('fixed');
         }
         if (!orgDetail.permaLink) {
           console.log('no permaLink for org', orgDetail.orgName);
           const identifier = getPermaLinkFromOrgName(orgDetail.orgName);
-          if (!identifier) return;
+          if (!identifier) continue;
           orgDetail.permaLink = identifier;
         }
         if (!orgDetail.error) {
-          return;
+          continue;
         }
         console.log(
           'Org in notable exit not fixed, looking up db now.....',
@@ -498,22 +579,18 @@ const cleanUpInvestmentJank = () => {
         }
         company.orgDetails = orgInRecord;
         console.log('Yay found', company.orgDetails);
-      });
+      }
     }
-
-    const permaLink = investmentInfo.permalink;
-    delete investmentInfo.permalink;
-    investmentInfo.permaLink = permaLink;
 
     const obj = {};
     obj[fileName] = investmentInfo;
     // console.log('obj: ', obj);
 
     fs.writeFileSync(path, JSON.stringify(obj));
-    console.log('saved');
-  });
+    console.log('Saved from CleanUpInvestmentJank');
+  }
 };
-const fix = (investment) => {
+const fix = async (investment) => {
   const orgSection = investment['Organization Name'];
   if (
     orgSection &&
@@ -533,15 +610,25 @@ const fix = (investment) => {
   }
 
   if (orgSection.orgDetails.error) {
-    orgDetail = orgDetails[permaLink];
+    const orgDetail = orgDetails[permaLink];
     if (orgDetail) {
       console.log('filling in orgDetail:', orgDetail);
       orgSection.orgDetails = orgDetail;
     } else {
       console.log("!!!!!! gg can't find org details in portco list", permaLink);
+      orgDetail = await fixSingleOrgDetail(permaLink);
+      console.log('fixed');
+      orgSection.orgDetails = orgDetail;
     }
   }
   investment['Organization Name'] = orgSection;
   return investment;
 };
 // cleanUpInvestmentJank();
+
+module.exports = {
+  fixOrgDetails,
+  generateOrgDetailSQLInsert,
+  cleanUpInvestmentJank,
+  processInvestmentHistory,
+};
