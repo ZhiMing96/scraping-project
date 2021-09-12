@@ -7,12 +7,23 @@
 // const hkInvestors = require('./investorProfiles/HK_Investors.json');
 // const jpnInvestors = require('./investorProfiles/Japan_Tokyo_investors.json');
 const fs = require('fs');
-const sgInvestors = require('./investorsInSingapore.json');
 const orgDetails = require('./orgdetails.json');
 const orgdetailOld = require('./orgdetails-old.json');
 
-const generalDownMigrationForNewlyAddedPortcos = (directory) => {
+const generalDownMigrationForNewlyAddedPortcos = (
+  migrationDirectory,
+  filePathToInvestors
+) => {
   let uniqueIdentifiers = [];
+  migrationDirectory = migrationDirectory ? migrationDirectory : '';
+  let investorData;
+  try {
+    investorData = require(`${filePathToInvestors}`);
+  } catch (e) {
+    console.log(`${filePathToInvestors} invalid: `, e.message);
+    return;
+  }
+  if (!investorData) return;
   for (const detail in orgDetails) {
     if (!Object.keys(orgdetailOld).includes(detail)) {
       if (detail.includes("'")) {
@@ -24,7 +35,7 @@ const generalDownMigrationForNewlyAddedPortcos = (directory) => {
     }
   }
   // change this to loop through investors that has been scraped
-  const names = sgInvestors.investor_profiles.map(({ name }) => {
+  const names = investorData.investor_profiles.map(({ name }) => {
     if (name.includes("'")) {
       name = name.split("'").join("''");
     }
@@ -33,13 +44,28 @@ const generalDownMigrationForNewlyAddedPortcos = (directory) => {
   const sql = `DELETE FROM onigiri.portfolio_companies WHERE unique_identifier IN (${uniqueIdentifiers});`;
   const sql2 = `DELETE FROM onigiri.investments WHERE org_identifier IN (${uniqueIdentifiers});`;
   const sql3 = `DELETE FROM onigiri.invesments WHERE investor_profile_id IN (SELECT id FROM onigiri.investor_profiles WHERE name IN (${names}))`;
-  fs.writeFileSync(`.${directory}/downSqlForPortco.sql`, sql);
-  fs.writeFileSync(`.${directory}/downSqlForInvestmentHistory.sql`, sql2);
+  fs.writeFileSync(`.${migrationDirectory}/downSqlForPortco.sql`, sql);
+  fs.writeFileSync(
+    `.${migrationDirectory}/downSqlForInvestmentHistory.sql`,
+    sql2
+  );
   // fs.writeFileSync('downSqlForInvestmentHistory2.sql', sql3);
 };
 
-const generalDownMigrationForInvestorProfilesEdits = (directory) => {
-  const ids = sgInvestors.investor_profiles
+const generalDownMigrationForInvestorProfilesEdits = (
+  migrationDirectory,
+  filePathToInvestors
+) => {
+  migrationDirectory = migrationDirectory ? migrationDirectory : '';
+  let investorData;
+  try {
+    investorData = require(`${filePathToInvestors}`);
+  } catch (e) {
+    console.log(`${filePathToInvestors} invalid: `, e.message);
+    return;
+  }
+  if (!investorData) return;
+  const ids = investorData.investor_profiles
     .map(({ name }) => {
       if (name.includes("'")) {
         name = name.split("'").join("''");

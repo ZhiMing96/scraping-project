@@ -1,16 +1,8 @@
-const sgInvestors = require('./confidential/investorProfiles/Singapore_Investors.json');
-const phInvestors = require('./confidential/investorProfiles/Philippines_Investors.json');
-const mlInvestors = require('./confidential/investorProfiles/Malaysia_Investors.json');
-const idInvestors = require('./confidential/investorProfiles/India_Investors.json');
-const hkInvestors = require('./confidential/investorProfiles/HK_Investors.json');
-const jpnInvestors = require('./confidential/investorProfiles/Japan_Tokyo_investors.json');
-// const investorsInSg = require('./investorProfiles/Germany_investors.json');
-const investorsInSg = require('./investorsInSingapore.json');
 const fs = require('fs');
 const orgDetails = require('./orgdetails.json');
 const existingOrgDetails = require('./orgdetails-old.json');
 const investorsParsed = require('./investorsParsed.json');
-const redirects = require('./redirect-trace.json');
+// const redirects = require('./redirect-trace.json');
 const onigiriOrgs = require('./onigiri_orgs.json');
 
 const { parseCrunchbase, getOrgDetails } = require('./crunchbase-scraper');
@@ -21,8 +13,20 @@ const removeJankyOrg = () => {
 };
 // removeJankyOrg();
 
-const removeCorrectRedirects = () => {
-  const investorToWebsite = investorsInSg.investor_profiles.reduce(
+const removeCorrectRedirects = (filePathToInvestors, folderToSaveData) => {
+  let investorData;
+  let redirects;
+  try {
+    investorData = require(`${filePathToInvestors}`);
+    redirects = require(`./${folderToSaveData}/redirect-trace.json`);
+  } catch (e) {
+    console.log(`File Path invalid: `, e.message);
+    return;
+  }
+  if (!investorData) return;
+  if (!redirects) return;
+
+  const investorToWebsite = investorData.investor_profiles.reduce(
     (acc, { website_url, name }) => {
       const formattedName = name.toLowerCase().split(' ').join('-');
       acc[formattedName] = website_url;
@@ -32,7 +36,7 @@ const removeCorrectRedirects = () => {
   );
   const filteredRedirects = redirects.filter(({ from, to, correct }) => {
     if (correct) return true;
-    const parsedData = require(`./sg-investors/${from}-crunch-base.json`);
+    const parsedData = require(`./${folderToSaveData}/${from}-crunch-base.json`);
     const info = parsedData[from];
 
     if (!info.website && !info['orgDetails']) return true;
@@ -58,19 +62,40 @@ const removeCorrectRedirects = () => {
     }
     return true;
   });
-  fs.writeFileSync('redirect-trace.json', JSON.stringify(filteredRedirects));
+  fs.writeFileSync(
+    `./${folderToSaveData}/redirect-trace.json`,
+    JSON.stringify(filteredRedirects)
+  );
 };
 
-const repopulateRedirects = async () => {
+const repopulateRedirects = async (folderToSaveData) => {
+  let redirects;
+  try {
+    redirects = require(`./${folderToSaveData}/redirect-trace.json`);
+  } catch (e) {
+    console.log(`File Path invalid: `, e.message);
+    return;
+  }
+  if (!redirects) return;
+
   for await (const info of redirects) {
     console.log('------- fetching info for: ', info.from);
-    await parseCrunchbase(info.from, 'sg-investors', info.correct);
+    await parseCrunchbase(info.from, folderToSaveData, info.correct);
     console.log('------- done -------');
   }
 };
 
-const fetchInvestorProfiles = async () => {
-  const investorList = investorsInSg.investor_profiles;
+const fetchInvestorProfiles = async (filePathToInvestors, folderToSaveData) => {
+  let investorData;
+  try {
+    investorData = require(`${filePathToInvestors}`);
+  } catch (e) {
+    console.log(`${filePathToInvestors} invalid: `, e.message);
+    return;
+  }
+  if (!investorData) return;
+
+  const investorList = investorData.investor_profiles;
 
   console.log('num of investors in list: ', investorList.length);
   for await (const investor of investorList) {
@@ -79,7 +104,7 @@ const fetchInvestorProfiles = async () => {
       continue;
     }
     console.log('------- fetching info for: ', investor.name);
-    await parseCrunchbase(investor.name, 'sg-investors');
+    await parseCrunchbase(investor.name, folderToSaveData);
     console.log('------- done -------');
   }
 };
@@ -164,8 +189,8 @@ const parseOrgDetails = () => {
 };
 // parseOrgDetails();
 
-const generateOrgDetailSQLInsert = (directory) => {
-  directory = directory ? directory : '';
+const generateOrgDetailSQLInsert = (migrationDirectory) => {
+  migrationDirectory = migrationDirectory ? migrationDirectory : '';
   const keys = [
     'permaLink',
     'orgName',
@@ -215,12 +240,12 @@ const generateOrgDetailSQLInsert = (directory) => {
   sql = sql.trim();
   sql = sql.slice(0, -1) + ';';
   // console.log(sql);
-  fs.writeFileSync(`.${directory}/insertAllPortco.sql`, sql);
+  fs.writeFileSync(`.${migrationDirectory}/insertAllPortco.sql`, sql);
 };
 // generateOrgDetailSQLInsert();
 
 const generateInsertSqlForHighlights = (
-  directory,
+  migrationDirectory,
   queryToGetInvestorProfileId,
   totalInvestments,
   totalLeadCount,
@@ -238,29 +263,35 @@ const generateInsertSqlForHighlights = (
   } WHERE id = (${queryToGetInvestorProfileId});\n`;
 
   let data = fs.readFileSync(
-    `.${directory}/updateInvestorProfileHighlights.sql`,
+    `.${migrationDirectory}/updateInvestorProfileHighlights.sql`,
     {
       encoding: 'utf8',
       flag: 'r',
     }
   );
   data += sql;
-  fs.writeFileSync(`.${directory}/updateInvestorProfileHighlights.sql`, data);
+  fs.writeFileSync(
+    `.${migrationDirectory}/updateInvestorProfileHighlights.sql`,
+    data
+  );
 };
 
 const generateDiversityUpdateScripts = (
-  directory,
+  migrationDirectory,
   orgPermaLink,
   diversityTag
 ) => {
   const sql = `UPDATE onigiri.portfolio_companies SET diversity_tag = '${diversityTag}' WHERE unique_identifier = '${orgPermaLink}';\n`;
 
-  let data = fs.readFileSync(`.${directory}/updatePortcoDiversity.sql`, {
-    encoding: 'utf8',
-    flag: 'r',
-  });
+  let data = fs.readFileSync(
+    `.${migrationDirectory}/updatePortcoDiversity.sql`,
+    {
+      encoding: 'utf8',
+      flag: 'r',
+    }
+  );
   data += sql;
-  fs.writeFileSync(`.${directory}/updatePortcoDiversity.sql`, data);
+  fs.writeFileSync(`.${migrationDirectory}/updatePortcoDiversity.sql`, data);
 };
 
 const getPermaLinkFromOrgName = (orgName) => {
@@ -273,16 +304,32 @@ const getPermaLinkFromOrgName = (orgName) => {
   console.log('Key not found for org', orgName);
 };
 
-const processInvestmentHistory = async (directory) => {
-  directory = directory ? directory : '';
-  let bulkInsertStatement = `INSERT INTO onigiri.investments (announcement_date,funding_round,amt_raised,is_lead,org_identifier, investment_type, investor_profiles_id, portfolio_companies_id, data_source) VALUES\n`;
-  fs.writeFileSync(`.${directory}/updateInvestorProfileHighlights.sql`, '');
-  fs.writeFileSync(`.${directory}/updatePortcoDiversity.sql`, '');
-  fs.truncateSync(`.${directory}/updateInvestorProfileHighlights.sql`);
-  fs.truncateSync(`.${directory}/updatePortcoDiversity.sql`);
-  fs.writeFileSync(`.${directory}/investors-with-error.json`, '[]');
+const processInvestmentHistory = async (
+  migrationDirectory,
+  filePathToInvestors,
+  folderToSaveData
+) => {
+  let investorData;
+  try {
+    investorData = require(`${filePathToInvestors}`);
+  } catch (e) {
+    console.log(`${filePathToInvestors} invalid: `, e.message);
+    return;
+  }
+  if (!investorData) return;
 
-  const investors = investorsInSg.investor_profiles;
+  migrationDirectory = migrationDirectory ? migrationDirectory : '';
+  let bulkInsertStatement = `INSERT INTO onigiri.investments (announcement_date,funding_round,amt_raised,is_lead,org_identifier, investment_type, investor_profiles_id, portfolio_companies_id, data_source) VALUES\n`;
+  fs.writeFileSync(
+    `.${migrationDirectory}/updateInvestorProfileHighlights.sql`,
+    ''
+  );
+  fs.writeFileSync(`.${migrationDirectory}/updatePortcoDiversity.sql`, '');
+  fs.truncateSync(`.${migrationDirectory}/updateInvestorProfileHighlights.sql`);
+  fs.truncateSync(`.${migrationDirectory}/updatePortcoDiversity.sql`);
+  fs.writeFileSync(`.${migrationDirectory}/investors-with-error.json`, '[]');
+
+  const investors = investorData.investor_profiles;
 
   for await (let investor of investors) {
     const name = investor.name;
@@ -297,20 +344,23 @@ const processInvestmentHistory = async (directory) => {
     const queryToGetInvestorProfileId = `SELECT id FROM onigiri.investor_profiles WHERE "name" = '${processedName}' AND headquarter_location = '${processedLocation}'`;
 
     const fileName = name.toLowerCase().split(' ').join('-');
-    const path = `./sg-investors/${fileName}-crunch-base.json`;
+    const path = `./${folderToSaveData}/${fileName}-crunch-base.json`;
     console.log(path);
     const data = fs.readFileSync(path, { encoding: 'utf8', flag: 'r' });
     const allInvestmentInfo = JSON.parse(data);
     const investmentInfo = allInvestmentInfo[fileName];
     if (investmentInfo.error) {
-      const data = fs.readFileSync(`.${directory}/investors-with-error.json`, {
-        flag: 'r',
-        encoding: 'utf8',
-      });
+      const data = fs.readFileSync(
+        `.${migrationDirectory}/investors-with-error.json`,
+        {
+          flag: 'r',
+          encoding: 'utf8',
+        }
+      );
       const names = JSON.parse(data);
       names.push(name);
       fs.writeFileSync(
-        `.${directory}/investors-with-error.json`,
+        `.${migrationDirectory}/investors-with-error.json`,
         JSON.stringify(names)
       );
       console.log('!!!!!!!!!! Skipping This investor because of error: ', name);
@@ -332,7 +382,7 @@ const processInvestmentHistory = async (directory) => {
       const totalDiversityInvestment =
         investmentHighlights['Diversity Investments'];
       generateInsertSqlForHighlights(
-        directory,
+        migrationDirectory,
         queryToGetInvestorProfileId,
         totalInvestments,
         totalLeadCount,
@@ -381,7 +431,11 @@ const processInvestmentHistory = async (directory) => {
       const orgSection = investment['Organization Name'];
       const permaLink = orgSection ? orgSection.orgDetails.permaLink : null;
       const diversityTag = investment['Diversity Spotlight (US Only)'].value;
-      generateDiversityUpdateScripts(directory, permaLink, diversityTag);
+      generateDiversityUpdateScripts(
+        migrationDirectory,
+        permaLink,
+        diversityTag
+      );
     });
 
     const filteredDiversityInvestments = diversityInvestments.map(
@@ -472,7 +526,7 @@ const processInvestmentHistory = async (directory) => {
   // console.log(bulkInsertStatement);
   try {
     fs.writeFileSync(
-      `.${directory}/insertInvestmentHistory.sql`,
+      `.${migrationDirectory}/insertInvestmentHistory.sql`,
       bulkInsertStatement
     );
     console.log('saved file');
@@ -488,8 +542,16 @@ const processInvestmentHistory = async (directory) => {
 
 // getInvestmentDetails('mystartr', 'india-investors');
 
-const cleanUpInvestmentJank = async () => {
-  const investors = investorsInSg.investor_profiles;
+const cleanUpInvestmentJank = async (filePathToInvestors, folderToSaveData) => {
+  let investorData;
+  try {
+    investorData = require(`${filePathToInvestors}`);
+  } catch (e) {
+    console.log(`${filePathToInvestors} invalid: `, e.message);
+    return;
+  }
+  if (!investorData) return;
+  const investors = investorData.investor_profiles;
 
   for await (let investor of investors) {
     const name = investor.name;
@@ -499,7 +561,7 @@ const cleanUpInvestmentJank = async () => {
     }
 
     const fileName = name.toLowerCase().split(' ').join('-');
-    const path = `./sg-investors/${fileName}-crunch-base.json`;
+    const path = `./${folderToSaveData}/${fileName}-crunch-base.json`;
     console.log('parsing this now:', path);
     const data = fs.readFileSync(path, { encoding: 'utf8', flag: 'r' });
     const allInvestmentInfo = JSON.parse(data);
@@ -627,6 +689,8 @@ const fix = async (investment) => {
 // cleanUpInvestmentJank();
 
 module.exports = {
+  removeCorrectRedirects,
+  fetchInvestorProfiles,
   fixOrgDetails,
   generateOrgDetailSQLInsert,
   cleanUpInvestmentJank,
