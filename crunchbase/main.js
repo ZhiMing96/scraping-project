@@ -22,6 +22,12 @@ const scrapeAndProcessData = async () => {
     if (!fs.existsSync('./scrapped-investors')) {
       fs.mkdirSync('./scrapped-investors');
     }
+
+    await fetchInvestorProfiles(
+      '/confidential/investorsInSingapore.json',
+      'scrapped-investors'
+    );
+
     removeCorrectRedirects(
       '/confidential/investorsInSingapore.json',
       'scrapped-investors'
