@@ -17,89 +17,118 @@ const launchBrowser = async () => {
     handleSIGTERM: false,
     handleSIGHUP: false,
     ignoreDefaultArgs: ['--enable-automation'],
+    defaultViewport: {
+      // this needed for mouse click
+      width: 840,
+      height: 630,
+    },
   });
   const page = await browser.newPage();
   await page.setUserAgent(
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36'
   );
-  // this needed for mouse click
-  await page.setViewport({ width: 1920, height: 1080 });
+
   return { browser, page };
 };
 const handlePageGoTo = async (page, url, searchTerm) => {
   // handle captcha and page notfound
   const timeout = Math.random() * 3000;
   console.log('navigating to url: ', url);
+  let isRedirected = false;
   try {
-    await page.goto(url, { timeout: 15000 });
+    await page.goto(url, { timeout: 10000, waitUntil: ['domcontentloaded'] });
+    console.log('page.goto done..');
     await page.waitForTimeout(timeout);
   } catch (err) {
-    console.log('Error - Navigation Timeout: ', err.message);
+    console.log('Error - First Navigation Timeout: ', err.message);
+    console.log('Start 5s pause...');
     await page.waitForTimeout(5000);
-    console.log('Reloading after 5s...');
+    console.log('Reloading...');
     try {
-      await page.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] });
+      await page.reload({ waitUntil: ['domcontentloaded'] });
     } catch (err) {
-      await page.screenshot({ path: `./${searchTerm}.jpeg`, type: 'jpeg' });
+      await page.screenshot({
+        path: `./screenshots-error/reload-error-${searchTerm}.jpeg`,
+        type: 'jpeg',
+      });
       console.error(
-        `please refer to screenshot taken here ${__dirname}/${searchTerm}-second-redirect-jank.jpeg`
+        `please refer to screenshot taken here ${__dirname}/reload-error-${searchTerm}.jpeg`
       );
       console.log('Timeout Error After Reload: ', err.message);
     }
   }
 
-  console.log('navigated');
+  console.log('navigated...');
   try {
     await crunchbaseCaptchaBypass(page);
     const notFound = await checkForPageNotFound(page);
     if (notFound) {
       await handlePageNotFound(searchTerm, page);
+      isRedirected = true;
     }
     console.log('done with go to');
+    return isRedirected;
   } catch (e) {
     const notFound = await checkForPageNotFound(page);
     if (notFound) {
       await handlePageNotFound(searchTerm, page);
+      isRedirected = true;
     }
+    return isRedirected;
   }
 };
 const parseCrunchbase = async (
   ventureFirmName,
   folderToSaveTo,
-  correctRedirectLink
+  ventureFirmWebsite,
+  correctPermaLink
 ) => {
   if (!folderToSaveTo) return;
   const { browser, page } = await launchBrowser();
-  const urlName = correctRedirectLink
-    ? correctRedirectLink
-    : ventureFirmName.toLowerCase().split(' ').join('-');
+  const permaLinkBasedOnVentureName = ventureFirmName
+    .toLowerCase()
+    .split(' ')
+    .join('-');
+  const urlName = correctPermaLink
+    ? correctPermaLink
+    : permaLinkBasedOnVentureName;
   console.log(urlName);
   const cbUrl = formatUrl(urlName);
   try {
-    const investmentDetails = (await handleProfileTypes(page, cbUrl)) || {
-      error: 'not found',
+    const investmentDetails = (await handleProfileTypes(
+      page,
+      cbUrl,
+      ventureFirmWebsite
+    )) || {
+      error: 'Error getting Investment Details',
     };
     investmentDetails['permaLink'] = page.url().split('/')[4];
     const ventureInvestmentDetails = {};
-    ventureInvestmentDetails[urlName] = investmentDetails;
+    ventureInvestmentDetails[permaLinkBasedOnVentureName] = investmentDetails;
     const stringifiedData = JSON.stringify(ventureInvestmentDetails);
     try {
       fs.writeFileSync(
-        `./${folderToSaveTo}/${urlName}-crunch-base.json`,
+        `${folderToSaveTo}/${permaLinkBasedOnVentureName}-crunch-base.json`,
         stringifiedData,
         { encoding: 'utf8', flag: 'w' }
+      );
+      console.log(
+        `Investor details saved successfully at ${folderToSaveTo}/${permaLinkBasedOnVentureName}-crunch-base.json`
       );
     } catch (err) {
       console.log('FAILED TO SAVE FILE FOR INVESTOR', ventureFirmName);
       console.log(err.message);
     }
     await browser.close();
-    return stringifiedData;
+    return ventureInvestmentDetails;
   } catch (err) {
-    console.error('parseCrunchbase error: ', err.message);
-    await page.screenshot({ path: `./${urlName}.jpeg`, type: 'jpeg' });
+    console.error('parseCrunchbase error: ', err);
+    await page.screenshot({
+      path: `./screenshots-error/root-error-${urlName}.jpeg`,
+      type: 'jpeg',
+    });
     console.error(
-      `please refer to screenshot taken here ${__dirname}/${urlName}.jpeg`
+      `please refer to screenshot taken here ${__dirname}/screenshots-error/root-error${urlName}.jpeg`
     );
     await browser.close();
     return;
@@ -112,21 +141,23 @@ const formatUrl = (urlName) => {
   return `https://www.crunchbase.com/organization/${urlName}`;
 };
 const crunchbaseCaptchaBypass = async (page) => {
-  await page.waitForSelector('#px-captcha', { timeout: 3500 });
-  console.log('captcha detected');
+  await page.waitForSelector('#px-captcha', { timeout: 3300 });
+  console.log('captcha detected, waiting for 3.5s...');
+  await page.waitForTimeout(3500);
+  console.log('mouse pressing bypass..');
+  await page.mouse.click(200, 200, { button: 'left', delay: 4500 });
+  // await page.screenshot({
+  //   path: `./${page.url().split('/').pop()}-captcha.jpeg`,
+  //   type: 'jpeg',
+  // });
+  console.log('Bypass (shld be) completed');
   await page.waitForTimeout(2000);
-  console.log('mouse pressing bypass');
-  await Promise.all([
-    page.mouse.click(434, 337, { button: 'left', delay: 3000 }),
-    page.waitForNavigation(),
-  ]);
-  console.log('Bypass completed');
   return;
 };
 
 const checkForPageNotFound = async (page) => {
   try {
-    await page.waitForSelector('page-not-found', { timeout: 2000 });
+    await page.waitForSelector('page-not-found', { timeout: 2500 });
     return true;
   } catch (e) {
     return false;
@@ -146,25 +177,23 @@ const handlePageNotFound = async (searchTerm, page) => {
         `https://www.crunchbase.com/v4/data/autocompletes?query=${urlEncodeSearchTerm}&collection_ids=organizations&limit=5&source=topSearch`
       );
       const json = await res.json();
-      console.log('JSON: ', json);
       return json.entities;
     }, urlEncodeSearchTerm);
     const topResultPermaLink =
       results.length > 0 ? results[0].identifier.permalink : '';
     if (!topResultPermaLink || topResultPermaLink === '') return;
 
-    const data = fs.readFileSync('redirect-trace.json');
-    const trace = JSON.parse(data);
+    let trace = require('./redirect-trace.json');
     const obj = { from: searchTerm, to: topResultPermaLink };
     trace.push(obj);
     try {
-      fs.writeFileSync('redirect-trace.json', JSON.stringify(trace), {
+      fs.writeFileSync('./redirect-trace.json', JSON.stringify(trace), {
         encoding: 'utf8',
         flag: 'w',
       });
       console.log('Saved redirect!');
     } catch (err) {
-      console.log('Failed top save redirect!', err.message);
+      console.log('Failed to save redirect!', err.message);
       console.log('redirect that failed: ', topResultPermaLink);
     }
     console.log('Redirect from Not Found:', topResultPermaLink);
@@ -191,17 +220,48 @@ const getInvestmentDetails = async (page, firmUrl) => {
   }
 };
 
-const handleProfileTypes = async (page, firmUrl) => {
+const handleProfileTypes = async (page, firmUrl, websiteToMatch) => {
   const searchTerm = firmUrl.split('/').pop();
-  await handlePageGoTo(page, firmUrl, searchTerm);
-  const investmentDetails = await handleParseInvestmentsRedirect(page);
+  const isRedirected = await handlePageGoTo(page, firmUrl, searchTerm);
+  const investmentDetails = await handleParseInvestmentsRedirect(
+    page,
+    websiteToMatch,
+    isRedirected
+  );
   return investmentDetails;
 };
-const handleParseInvestmentsRedirect = async (page) => {
+const handleParseInvestmentsRedirect = async (
+  page,
+  websiteToMatch,
+  isRedirected
+) => {
   const timeout = Math.random() * 1000;
   await page.waitForTimeout(timeout);
-  await page.waitForSelector('div.mat-tab-link-container');
-  const orgDetails = await parseOrgDetails(page);
+  try {
+    await page.waitForSelector('div.mat-tab-link-container', {
+      timeout: 7000,
+    });
+  } catch (e) {
+    await handlePageGoTo(page, page.url(), page.url().split('/').pop());
+    await page.waitForTimeout(1000);
+  }
+  websiteToMatch = isRedirected ? websiteToMatch : undefined;
+  let orgDetails = await parseOrgDetails(page, websiteToMatch);
+  if (isRedirected) {
+    if (orgDetails && orgDetails['error']) {
+      if (orgDetails['error'].includes('Redirect Failed')) {
+        return { error: orgDetails['error'] };
+      }
+    } else {
+      console.log('Redirect was successful! removing from redirect-trace now');
+      const permaLink = page.url().split('/').pop();
+      let redirects = require('./redirect-trace.json');
+      redirects = redirects.filter(({ to }) => to !== permaLink);
+      fs.writeFileSync('./redirect-trace.json', JSON.stringify(redirects));
+      console.log('updated redirect-trace.json');
+    }
+  }
+
   const tabNavigations = await page.$$eval('div.mat-tab-links > a', (tabs) =>
     tabs.map((tab) => ({ value: tab.innerText.toLowerCase(), link: tab.href }))
   );
@@ -225,32 +285,43 @@ const handleParseInvestmentsRedirect = async (page) => {
   // console.log('redirecting to url: ', linkWithInvestmentDetails);
   await handlePageGoTo(page, linkWithInvestmentDetails, '');
   const investmentDetails = await parseInvestmentDetails(page);
-  if (investmentDetails) investmentDetails['orgDetails'] = orgDetails;
+  if (!investmentDetails) return orgDetails;
+
+  investmentDetails['orgDetails'] = orgDetails;
   return investmentDetails;
 };
 
 const parseInvestmentDetails = async (page) => {
   try {
-    await page.waitForSelector('row-card.overview-card');
+    try {
+      await page.waitForSelector('row-card.overview-card', { timeout: 7000 });
+    } catch (e) {
+      await handlePageGoTo(page, page.url(), page.url().split('/').pop());
+      await page.waitForTimeout(1000);
+    }
     const investmentSummarySection = await page.$$eval(
       'phrase-list-card.ng-star-inserted',
       (contents) => contents.map((content) => content.innerText)
     );
-
-    const highlights = await page.$$(
-      'anchored-values.ng-star-inserted > div.spacer.ng-star-inserted'
-    );
     const investmentHighlights = {};
-    for await (const highlight of highlights) {
-      const header = await highlight.$eval('label-with-info', (el) =>
-        el.innerText ? el.innerText.trim() : el.innerText
+    try {
+      const highlights = await page.$$(
+        'anchored-values.ng-star-inserted > div.spacer.ng-star-inserted'
       );
-      const value = await highlight.$eval(
-        'field-formatter',
-        (el) => el.innerText
-      );
-      investmentHighlights[header] = value;
+      for await (const highlight of highlights) {
+        const header = await highlight.$eval('label-with-info', (el) =>
+          el.innerText ? el.innerText.trim() : el.innerText
+        );
+        const value = await highlight.$eval(
+          'field-formatter',
+          (el) => el.innerText
+        );
+        investmentHighlights[header] = value;
+      }
+    } catch (e) {
+      console.log('Investor has no highlights');
     }
+
     const recentInvestments = [];
     const sections = await page.$$(
       'div.main-content > row-card.ng-star-inserted'
@@ -345,7 +416,13 @@ const parseInvestmentDetails = async (page) => {
         'image-list-card.ng-star-inserted > ul > li'
       );
       for await (const exit of notableExitNodes) {
-        const companyImgLink = await exit.$eval('img', (el) => el.src);
+        let companyImgLink;
+        try {
+          companyImgLink = await exit.$eval('img', (el) => el.src);
+        } catch (e) {
+          companyImgLink = '';
+        }
+
         const { companyName, companyCBProfileUrl } = await exit.$eval(
           'div.fields > a.link-accent',
           (el) => {
@@ -355,10 +432,16 @@ const parseInvestmentDetails = async (page) => {
             };
           }
         );
-        const companyDescription = await exit.$eval(
-          'div.fields > field-formatter > span',
-          (el) => el.innerText.trim()
-        );
+        let companyDescription;
+        try {
+          companyDescription = await exit.$eval(
+            'div.fields > field-formatter > span',
+            (el) => el.innerText.trim()
+          );
+        } catch (e) {
+          companyDescription = '';
+        }
+
         notableExits.push({
           companyName,
           companyCBProfileUrl,
@@ -402,7 +485,7 @@ const parseInvestmentDetails = async (page) => {
           newOrgsAdded++;
         }
       } catch (e) {
-        console.log(e);
+        console.log(`Error parsing org. skipping...`);
         continue;
       }
     }
@@ -526,26 +609,33 @@ const getOrgDetails = async (url) => {
     const orgDetails = await parseOrgDetails(page);
     orgDetails['permaLink'] = page.url().split('/').pop();
     await browser.close();
-    // console.log(orgDetails);
     return orgDetails;
   } catch (err) {
     console.log('getOrgDetails Error:', err);
-    await page.screenshot({ path: `./${searchTerm}.jpeg`, type: 'jpeg' });
+    await page.screenshot({
+      path: `./screenshots-error/org-detail-error-${searchTerm}.jpeg`,
+      type: 'jpeg',
+    });
     console.error(
-      `please refer to screenshot taken here ${__dirname}/${searchTerm}.jpeg`
+      `please refer to screenshot taken here ${__dirname}/screenshots-error/org-detail-error-${searchTerm}.jpeg`
     );
     await browser.close();
     return {
       error: err.message,
-      screenshotPath: `./${searchTerm}.jpeg`,
+      screenshotPath: `./screenshots-error/org-detail-error-${searchTerm}.jpeg`,
       html: htmlContent,
     };
   }
 };
 
-const parseOrgDetails = async (page) => {
+const parseOrgDetails = async (page, websiteToMatch) => {
   try {
-    await page.waitForSelector('profile-header');
+    try {
+      await page.waitForSelector('profile-header', { timeout: 7000 });
+    } catch (e) {
+      await handlePageGoTo(page, page.url(), page.url().split('/').pop());
+      await page.waitForTimeout(1000);
+    }
 
     const profileType = await page.$eval(
       'div.profile-type',
@@ -575,9 +665,50 @@ const parseOrgDetails = async (page) => {
       'website',
       'cbRank',
     ];
-    const values = await aboutDetails.$$eval('fields-card > ul > li', (data) =>
-      data.map((el) => el.innerText)
+    let domainToMatch = '';
+    if (websiteToMatch) {
+      if (websiteToMatch.includes('//')) {
+        websiteToMatch = websiteToMatch.split('//').pop();
+      }
+      if (websiteToMatch.includes('www.')) {
+        websiteToMatch = websiteToMatch.split('www.').pop();
+      }
+      domainToMatch = websiteToMatch;
+      console.log('domain to match for investor redirect is: ', domainToMatch);
+    }
+    const { values, websiteMatch } = await aboutDetails.$$eval(
+      'fields-card > ul > li',
+      (data, domainToMatch) => {
+        let websiteMatch = false;
+        let values = data.map((el) => {
+          const textContent = el.innerText;
+          if (
+            textContent &&
+            domainToMatch &&
+            textContent.toLowerCase().includes(domainToMatch)
+          ) {
+            websiteMatch = true;
+          }
+          return el.innerText;
+        });
+        return { values, websiteMatch };
+      },
+      domainToMatch
     );
+    try {
+      if (websiteToMatch && !websiteMatch) {
+        throw new Error('Redirect Failed, Website did not match');
+      }
+    } catch (e) {
+      await page.screenshot({
+        path: `./screenshots-error/redirect-error-${page
+          .url()
+          .split('/')
+          .pop()}.jpeg`,
+        type: 'jpeg',
+      });
+      return { error: e.message };
+    }
     if (values[0].includes('Acquired by')) {
       const acquiredBy = values.shift().split('\n')[1];
       orgSummary.acquiredBy = acquiredBy;
@@ -656,14 +787,27 @@ const parseOrgDetails = async (page) => {
       }
     }
     orgSummary['detailedInfo'] = detailedInfo;
-    const socialLinks = await detailsSection.$$eval(
-      'div.section-content > fields-card:last-child > ul > li > field-formatter > link-formatter > a',
-      (links) => links.map((link) => link.href)
-    );
+    let socialLinks;
+    try {
+      socialLinks = await detailsSection.$$eval(
+        'div.section-content > fields-card:last-child > ul > li > field-formatter > link-formatter > a',
+        (links) => links.map((link) => link.href)
+      );
+    } catch (e) {
+      socialLinks = [];
+    }
+
     orgSummary.socialLinks = socialLinks;
     return orgSummary;
   } catch (e) {
-    console.log('Error parsing org details: ', e);
+    console.log('Error parsing org details: ', e.message);
+    await page.screenshot({
+      path: `./screenshots-error/org-detail-error-${page
+        .url()
+        .split('/')
+        .pop()}.jpeg`,
+      type: 'jpeg',
+    });
     return { error: e.message };
   }
 };

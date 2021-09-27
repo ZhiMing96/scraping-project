@@ -1,11 +1,3 @@
-// const antlerList = require('./antler_vcs.json');
-// const onigiriList = require('./onigiri_investors.json');
-// const sgInvestors = require('./investorProfiles/Singapore_Investors.json');
-// const phInvestors = require('./investorProfiles/Philippines_Investors.json');
-// const mlInvestors = require('./investorProfiles/Malaysia_Investors.json');
-// const idInvestors = require('./investorProfiles/India_Investors.json');
-// const hkInvestors = require('./investorProfiles/HK_Investors.json');
-// const jpnInvestors = require('./investorProfiles/Japan_Tokyo_investors.json');
 const fs = require('fs');
 const orgDetails = require('./orgdetails.json');
 const orgdetailOld = require('./orgdetails-old.json');
@@ -44,9 +36,9 @@ const generalDownMigrationForNewlyAddedPortcos = (
   const sql = `DELETE FROM onigiri.portfolio_companies WHERE unique_identifier IN (${uniqueIdentifiers});`;
   const sql2 = `DELETE FROM onigiri.investments WHERE org_identifier IN (${uniqueIdentifiers});`;
   const sql3 = `DELETE FROM onigiri.invesments WHERE investor_profile_id IN (SELECT id FROM onigiri.investor_profiles WHERE name IN (${names}))`;
-  fs.writeFileSync(`.${migrationDirectory}/downSqlForPortco.sql`, sql);
+  fs.writeFileSync(`${migrationDirectory}/downSqlForPortco.sql`, sql);
   fs.writeFileSync(
-    `.${migrationDirectory}/downSqlForInvestmentHistory.sql`,
+    `${migrationDirectory}/downSqlForInvestmentHistory.sql`,
     sql2
   );
   // fs.writeFileSync('downSqlForInvestmentHistory2.sql', sql3);
@@ -56,7 +48,7 @@ const generalDownMigrationForInvestorProfilesEdits = (
   migrationDirectory,
   filePathToInvestors
 ) => {
-  migrationDirectory = migrationDirectory ? migrationDirectory : '';
+  migrationDirectory = migrationDirectory ? migrationDirectory : '.';
   let investorData;
   try {
     investorData = require(`${filePathToInvestors}`);
@@ -75,7 +67,7 @@ const generalDownMigrationForInvestorProfilesEdits = (
     .slice(0, -1);
 
   const sql = `UPDATE onigiri.investor_profiles SET total_investments = null, total_lead_count = null, total_exit_count = null, diversity_investments = null WHERE name IN (${ids});`;
-  fs.writeFileSync(`.${directory}/downSqlForHighlights.sql`, sql);
+  fs.writeFileSync(`${migrationDirectory}/downSqlForHighlights.sql`, sql);
 };
 // getAllIds();
 

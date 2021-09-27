@@ -2,8 +2,6 @@ const fs = require('fs');
 const orgDetails = require('./orgdetails.json');
 const existingOrgDetails = require('./orgdetails-old.json');
 const investorsParsed = require('./investorsParsed.json');
-// const redirects = require('./redirect-trace.json');
-const onigiriOrgs = require('./onigiri_orgs.json');
 
 const { parseCrunchbase, getOrgDetails } = require('./crunchbase-scraper');
 
@@ -13,12 +11,27 @@ const removeJankyOrg = () => {
 };
 // removeJankyOrg();
 
+const fetchSingleInvestor = async (
+  investorName,
+  folderToSavTo,
+  websiteToMatch,
+  correctPermaLink
+) => {
+  await parseCrunchbase(
+    investorName,
+    folderToSavTo,
+    websiteToMatch,
+    correctPermaLink
+  );
+};
+// fetchSingleInvestor('EverHaüs', './scrapped-investors', 'http://ever.haus');
+
 const removeCorrectRedirects = (filePathToInvestors, folderToSaveData) => {
   let investorData;
   let redirects;
   try {
     investorData = require(`${filePathToInvestors}`);
-    redirects = require(`./${folderToSaveData}/redirect-trace.json`);
+    redirects = require(`${folderToSaveData}/redirect-trace.json`);
   } catch (e) {
     console.log(`File Path invalid: `, e.message);
     return;
@@ -36,7 +49,7 @@ const removeCorrectRedirects = (filePathToInvestors, folderToSaveData) => {
   );
   const filteredRedirects = redirects.filter(({ from, to, correct }) => {
     if (correct) return true;
-    const parsedData = require(`./${folderToSaveData}/${from}-crunch-base.json`);
+    const parsedData = require(`${folderToSaveData}/${from}-crunch-base.json`);
     const info = parsedData[from];
 
     if (!info.website && !info['orgDetails']) return true;
@@ -63,7 +76,7 @@ const removeCorrectRedirects = (filePathToInvestors, folderToSaveData) => {
     return true;
   });
   fs.writeFileSync(
-    `./${folderToSaveData}/redirect-trace.json`,
+    `${folderToSaveData}/redirect-trace.json`,
     JSON.stringify(filteredRedirects)
   );
 };
@@ -71,7 +84,7 @@ const removeCorrectRedirects = (filePathToInvestors, folderToSaveData) => {
 const repopulateRedirects = async (folderToSaveData) => {
   let redirects;
   try {
-    redirects = require(`./${folderToSaveData}/redirect-trace.json`);
+    redirects = require(`${folderToSaveData}/redirect-trace.json`);
   } catch (e) {
     console.log(`File Path invalid: `, e.message);
     return;
@@ -104,7 +117,11 @@ const fetchInvestorProfiles = async (filePathToInvestors, folderToSaveData) => {
       continue;
     }
     console.log('------- fetching info for: ', investor.name);
-    await parseCrunchbase(investor.name, folderToSaveData);
+    await parseCrunchbase(
+      investor.name,
+      folderToSaveData,
+      investor.website_url
+    );
     console.log('------- done -------');
   }
 };
@@ -151,7 +168,7 @@ const parseOrgDetails = () => {
   for (const detail in orgDetails) {
     const details = orgDetails[detail];
     if (existingOrgs.includes(detail)) {
-      // only because orgDetail is not saved to file.
+      // IMPT: I am deleting only because orgDetail is not saved to file.
       delete orgDetails[detail];
       continue;
     }
@@ -240,7 +257,7 @@ const generateOrgDetailSQLInsert = (migrationDirectory) => {
   sql = sql.trim();
   sql = sql.slice(0, -1) + ';';
   // console.log(sql);
-  fs.writeFileSync(`.${migrationDirectory}/insertAllPortco.sql`, sql);
+  fs.writeFileSync(`${migrationDirectory}/insertAllPortco.sql`, sql);
 };
 // generateOrgDetailSQLInsert();
 
@@ -263,7 +280,7 @@ const generateInsertSqlForHighlights = (
   } WHERE id = (${queryToGetInvestorProfileId});\n`;
 
   let data = fs.readFileSync(
-    `.${migrationDirectory}/updateInvestorProfileHighlights.sql`,
+    `${migrationDirectory}/updateInvestorProfileHighlights.sql`,
     {
       encoding: 'utf8',
       flag: 'r',
@@ -271,7 +288,7 @@ const generateInsertSqlForHighlights = (
   );
   data += sql;
   fs.writeFileSync(
-    `.${migrationDirectory}/updateInvestorProfileHighlights.sql`,
+    `${migrationDirectory}/updateInvestorProfileHighlights.sql`,
     data
   );
 };
@@ -284,14 +301,14 @@ const generateDiversityUpdateScripts = (
   const sql = `UPDATE onigiri.portfolio_companies SET diversity_tag = '${diversityTag}' WHERE unique_identifier = '${orgPermaLink}';\n`;
 
   let data = fs.readFileSync(
-    `.${migrationDirectory}/updatePortcoDiversity.sql`,
+    `${migrationDirectory}/updatePortcoDiversity.sql`,
     {
       encoding: 'utf8',
       flag: 'r',
     }
   );
   data += sql;
-  fs.writeFileSync(`.${migrationDirectory}/updatePortcoDiversity.sql`, data);
+  fs.writeFileSync(`${migrationDirectory}/updatePortcoDiversity.sql`, data);
 };
 
 const getPermaLinkFromOrgName = (orgName) => {
@@ -318,16 +335,16 @@ const processInvestmentHistory = async (
   }
   if (!investorData) return;
 
-  migrationDirectory = migrationDirectory ? migrationDirectory : '';
+  migrationDirectory = migrationDirectory ? migrationDirectory : '.';
   let bulkInsertStatement = `INSERT INTO onigiri.investments (announcement_date,funding_round,amt_raised,is_lead,org_identifier, investment_type, investor_profiles_id, portfolio_companies_id, data_source) VALUES\n`;
   fs.writeFileSync(
-    `.${migrationDirectory}/updateInvestorProfileHighlights.sql`,
+    `${migrationDirectory}/updateInvestorProfileHighlights.sql`,
     ''
   );
-  fs.writeFileSync(`.${migrationDirectory}/updatePortcoDiversity.sql`, '');
-  fs.truncateSync(`.${migrationDirectory}/updateInvestorProfileHighlights.sql`);
-  fs.truncateSync(`.${migrationDirectory}/updatePortcoDiversity.sql`);
-  fs.writeFileSync(`.${migrationDirectory}/investors-with-error.json`, '[]');
+  fs.writeFileSync(`${migrationDirectory}/updatePortcoDiversity.sql`, '');
+  fs.truncateSync(`${migrationDirectory}/updateInvestorProfileHighlights.sql`);
+  fs.truncateSync(`${migrationDirectory}/updatePortcoDiversity.sql`);
+  fs.writeFileSync(`${migrationDirectory}/investors-with-error.json`, '[]');
 
   const investors = investorData.investor_profiles;
 
@@ -343,15 +360,20 @@ const processInvestmentHistory = async (
 
     const queryToGetInvestorProfileId = `SELECT id FROM onigiri.investor_profiles WHERE "name" = '${processedName}' AND headquarter_location = '${processedLocation}'`;
 
-    const fileName = name.toLowerCase().split(' ').join('-');
-    const path = `./${folderToSaveData}/${fileName}-crunch-base.json`;
+    const fileName = name
+      .toLowerCase()
+      .split(' ')
+      .join('-')
+      .split('/')
+      .join('-');
+    const path = `${folderToSaveData}/${fileName}-crunch-base.json`;
     console.log(path);
     const data = fs.readFileSync(path, { encoding: 'utf8', flag: 'r' });
     const allInvestmentInfo = JSON.parse(data);
     const investmentInfo = allInvestmentInfo[fileName];
     if (investmentInfo.error) {
       const data = fs.readFileSync(
-        `.${migrationDirectory}/investors-with-error.json`,
+        `${migrationDirectory}/investors-with-error.json`,
         {
           flag: 'r',
           encoding: 'utf8',
@@ -360,7 +382,7 @@ const processInvestmentHistory = async (
       const names = JSON.parse(data);
       names.push(name);
       fs.writeFileSync(
-        `.${migrationDirectory}/investors-with-error.json`,
+        `${migrationDirectory}/investors-with-error.json`,
         JSON.stringify(names)
       );
       console.log('!!!!!!!!!! Skipping This investor because of error: ', name);
@@ -526,7 +548,7 @@ const processInvestmentHistory = async (
   // console.log(bulkInsertStatement);
   try {
     fs.writeFileSync(
-      `.${migrationDirectory}/insertInvestmentHistory.sql`,
+      `${migrationDirectory}/insertInvestmentHistory.sql`,
       bulkInsertStatement
     );
     console.log('saved file');
@@ -535,12 +557,6 @@ const processInvestmentHistory = async (
   }
 };
 // processInvestmentHistory();
-
-// const getInvestmentDetails = async (name, filePath) => {
-//   await parseCrunchbase(name, filePath);
-// };
-
-// getInvestmentDetails('mystartr', 'india-investors');
 
 const cleanUpInvestmentJank = async (filePathToInvestors, folderToSaveData) => {
   let investorData;
@@ -560,15 +576,70 @@ const cleanUpInvestmentJank = async (filePathToInvestors, folderToSaveData) => {
       continue;
     }
 
-    const fileName = name.toLowerCase().split(' ').join('-');
-    const path = `./${folderToSaveData}/${fileName}-crunch-base.json`;
+    const fileName = name
+      .toLowerCase()
+      .split(' ')
+      .join('-')
+      .split('/')
+      .join('-');
+    const path = `${folderToSaveData}/${fileName}-crunch-base.json`;
     console.log('parsing this now:', path);
-    const data = fs.readFileSync(path, { encoding: 'utf8', flag: 'r' });
-    const allInvestmentInfo = JSON.parse(data);
+    let allInvestmentInfo;
+    try {
+      const data = fs.readFileSync(path, { encoding: 'utf8', flag: 'r' });
+      allInvestmentInfo = JSON.parse(data);
+    } catch (e) {
+      console.log('Scrapped file was not created for investor', name);
+      console.log('parsing investor again....');
+      allInvestmentInfo = await parseCrunchbase(
+        name,
+        folderToSaveData,
+        investor.website_url
+      );
+    }
+
     investmentInfo = allInvestmentInfo[fileName];
     if (investmentInfo.error) {
-      console.log('!!!!!!!!!! This investor has an error: ', name);
-      continue;
+      if (investmentInfo.error.toLowerCase().includes('not found')) {
+        continue;
+      }
+      let manualFixingList = require('./investors-require-manual-fix.json');
+      console.log(
+        `!!!!!!!!!! investor ${name} has an error: `,
+        investmentInfo.error
+      );
+      if (investmentInfo.error.includes('Redirect Failed')) {
+        console.log('skipping investor, requires manual attention');
+        manualFixingList.push({
+          name,
+          error: 'redirect failed',
+        });
+        fs.writeFileSync(
+          './investors-require-manual-fix.json',
+          JSON.stringify(manualFixingList)
+        );
+        continue;
+      }
+      console.log('parsing investments again');
+      allInvestmentInfo = await parseCrunchbase(
+        name,
+        folderToSaveData,
+        investor.website_url
+      );
+      if (allInvestmentInfo[fileName].error) {
+        console.log(
+          'after second parse, still errored out.. skipping investor'
+        );
+        manualFixingList.push({
+          name,
+          error: allInvestmentInfo[fileName].error,
+        });
+        fs.writeFileSync(
+          './investors-require-manual-fix.json',
+          JSON.stringify(manualFixingList)
+        );
+        continue;
+      }
     }
     let {
       recentInvestments,
@@ -654,6 +725,9 @@ const cleanUpInvestmentJank = async (filePathToInvestors, folderToSaveData) => {
 };
 const fix = async (investment) => {
   const orgSection = investment['Organization Name'];
+  if (!orgSection) {
+    console.log('!!!!!!!!! GG this guy no orgSection at all', investment);
+  }
   if (
     orgSection &&
     !orgSection.orgDetails.error &&
@@ -661,9 +735,7 @@ const fix = async (investment) => {
   ) {
     return investment;
   }
-  if (!orgSection) {
-    console.log('!!!!!!!!! GG this guy no orgSection at all', investment);
-  }
+
   let permaLink = orgSection.orgDetails.permaLink;
 
   if (!permaLink) {
@@ -695,4 +767,5 @@ module.exports = {
   generateOrgDetailSQLInsert,
   cleanUpInvestmentJank,
   processInvestmentHistory,
+  fetchSingleInvestor,
 };
